@@ -1,0 +1,45 @@
+CPU limit v1.2 beta FREEWARE
+(c)Killer{R}, 14/03/2005 - 17/03/2005, http://www.killprog.com
+
+---RUS
+Эта программа предназначена для ограничения использования времени процессора 
+какой нибудь другой программой. Полезно например для клиентов распределенных 
+вычислений - ограничивая загрузку процессора, позволяет ограничивать его 
+тепловыделение.
+Настройка осуществляется путем редактирования cpulimit.ini
+Может работать как обычное приложение и как сервис.
+Как приложение имеет доступ только к тем приложениям, на какие хватит прав.
+Как сервис можен контролировать и другие сервисы.
+
+Режим работы простым приложением:
+Запуск - путем запуска cpulimit.exe после настройки cpulimit.ini
+Останов - путем запуска cpulimit.exe с ключом /q
+После изменения настроек необходим перезапуск программы вручную
+
+Режим работы сервисом:
+Установка - распаковать cpulimit.exe и выполнить cpulimit.exe /install
+Запуск - net start CPULimit
+Останов - net stop CPULimit
+Удаление - cpulimit.exe /uninstall
+После изменения настроек необходим перезапуск сервиса вручную
+
+---ENG
+This program allow limit CPU usage by any other program. This can be usefull
+for example for those users, who use distributed clients and have problems 
+with CPU overheating.
+Edit cpulimit.ini file for configure program
+Can work as usual application or as system service
+As application can control only those processes, that run under current user account
+As service can control all processes, including other services
+
+Usual application mode:
+Start it - by start cpulimit.exe after configuring cpulimit.ini
+Stop it - by start cpulimit.exe with key /q
+Program must be restarted after changing cpulimit.ini to apply new settings
+
+System service mode:
+Install - extract cpulimit.exe and execute cpulimit.exe /install
+Start - net start CPULimit
+Stop - net stop CPULimit
+Uninstall - cpulimit.exe /uninstall
+Service must be restarted manually after changing cpulimit.ini to apply new settings
