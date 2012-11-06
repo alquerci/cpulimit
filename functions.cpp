@@ -122,7 +122,9 @@ void __fastcall CPULimitMain()
 	DWORD timeoff = GetPrivateProfileInt(L"Settings", L"TimeOff", 1000, fpath);
 	DWORD hipr = GetPrivateProfileInt(L"Settings", L"HighPriority", 0, fpath);
 	DWORD CanUseNtDll = GetPrivateProfileInt(L"Settings", L"CanUseNtDll", 1, fpath);
-	if( exename[0] && (timeon) && (timeoff) )
+	DWORD ExePriority = GetPrivateProfileInt(L"Settings", L"ExePriority", 1, fpath);
+
+	if( exename[0] && (timeon) && (timeoff >= 0) )
 	{
 		if(extOpenThread)
 		{
@@ -137,6 +139,7 @@ void __fastcall CPULimitMain()
 			}
 			HANDLE prc = 0;
 			DWORD pid;
+			DWORD prc_priority = NORMAL_PRIORITY_CLASS;
 			while(! OpenMutex( MUTEX_ALL_ACCESS, 0, L"CPULimit_Deactivate_Mutex") )
 			{
 				if(prc && (WaitForSingleObject(prc, 0) != WAIT_TIMEOUT) )
@@ -147,29 +150,58 @@ void __fastcall CPULimitMain()
 				if(!prc)
 				{
 					prc = ProcByExe(exename, pid);
+					
+					if(prc)
+					{
+						switch (ExePriority)
+						{
+							case 0:
+								prc_priority = IDLE_PRIORITY_CLASS;
+								break;
+							case 2:
+								prc_priority = HIGH_PRIORITY_CLASS;
+								break;
+							case 3:
+								prc_priority = REALTIME_PRIORITY_CLASS;
+								break;
+							default:
+								prc_priority = NORMAL_PRIORITY_CLASS;
+								break;
+						}
+						wprintf(L"\n> %s is running.", exename);
+						SetPriorityClass(prc, prc_priority);
+					}
 				}
 				if(prc)
 				{
-					if(extSuspendProcess && CanUseNtDll)
+					if(timeoff != 0)
 					{
-						extSuspendProcess(prc);
+						if(extSuspendProcess && CanUseNtDll)
+						{
+							extSuspendProcess(prc);
+						}
+						else
+						{
+							SuspendResumeIt(pid, 1);
+						}
+						wprintf(L"!");
+						Sleep(timeoff);
+						wprintf(L".");
+						if(extResumeProcess && CanUseNtDll)
+						{
+							extResumeProcess(prc);
+						}
+						else
+						{
+							SuspendResumeIt(pid, 0);
+						}
+						Sleep(timeon);
 					}
 					else
 					{
-						SuspendResumeIt(pid, 1);
+						wprintf(L".");
+						Sleep(2000);
 					}
-					wprintf(L"Suspend %s  during %u ms\n", exename, timeoff);
-					Sleep(timeoff);
-					wprintf(L"Resume %s  during %u ms\n", exename, timeon);
-					if(extResumeProcess && CanUseNtDll)
-					{
-						extResumeProcess(prc);
-					}
-					else
-					{
-						SuspendResumeIt(pid, 0);
-					}
-					Sleep(timeon);
 				}
 				else
 				{
