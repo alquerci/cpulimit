@@ -92,7 +92,7 @@ void __fastcall CPULimitMain()
 	if( OpenMutex(MUTEX_ALL_ACCESS, 0, L"CPULimit_Activated_Mutex") )
 	{
 		MessageBox(0, L"CPULimit.exe already started!", L"CPULimit", MB_ICONWARNING);
-		ExitProcess(-3);
+		ExitProcess(4294967293);
 	}
 	HANDLE amtx = CreateMutex(0, true, L"CPULimit_Activated_Mutex");
 

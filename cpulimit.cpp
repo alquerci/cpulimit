@@ -88,7 +88,6 @@ int main(int argc, TCHAR* argv[])
 	}
 
 	ExitProcess(0);
-	return 0;
 }
 
 
