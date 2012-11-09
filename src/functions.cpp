@@ -89,6 +89,35 @@ void __fastcall SuspendResumeIt(DWORD pid, bool suspend)
 
 void __fastcall CPULimitMain(int argc, WCHAR *argv[])
 {
+    //parse arguments
+    int next_option;
+    int option_index = 0;
+    //A string listing valid short options letters
+    const WCHAR* short_options = L"h";
+    //An array describing valid long options
+    const struct option long_options[] = {
+        { L"help", no_argument, NULL, L'h' },
+        { 0, 0, 0, 0 }
+    };
+    do 
+    {
+        next_option = getopt_long(argc, argv, short_options,long_options, &option_index);
+        switch(next_option) 
+        {
+            case 'h':
+                Cmd::PrintUsage(stdout, 1);
+                break;
+            case '?':
+                Cmd::PrintUsage(stderr, 1);
+                break;
+            case -1:
+                break;
+            default:
+                abort();
+        }
+    } while(next_option != -1);
+
+
     if( OpenMutex(MUTEX_ALL_ACCESS, 0, L"CPULimit_Activated_Mutex") )
     {
         MessageBox(0, L"CPULimit.exe already started!", L"CPULimit", MB_ICONWARNING);

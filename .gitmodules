@@ -1,0 +1,3 @@
+[submodule "vendor/ermshiperete/getopt"]
+	path = vendor/ermshiperete/getopt
+	url = https://github.com/ermshiperete/getopt.git
