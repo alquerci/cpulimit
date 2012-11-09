@@ -176,23 +176,23 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\cpulimit.cpp"
+				RelativePath=".\src\cpulimit.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\functions.cpp"
+				RelativePath=".\src\functions.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\RTL_calls.cpp"
+				RelativePath=".\src\RTL_calls.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\service_support.cpp"
+				RelativePath=".\src\service_support.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\stdafx.cpp"
+				RelativePath=".\src\stdafx.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -202,14 +202,10 @@
 						UsePrecompiledHeader="1"
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="1"
-					/>
-				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\utils.cpp"
+				>
 			</File>
 		</Filter>
 		<Filter
@@ -218,27 +214,31 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\cpulimit.h"
+				RelativePath=".\src\cpulimit.h"
 				>
 			</File>
 			<File
-				RelativePath=".\functions.h"
+				RelativePath=".\src\functions.h"
 				>
 			</File>
 			<File
-				RelativePath=".\RTL_calls.h"
+				RelativePath=".\src\RTL_calls.h"
 				>
 			</File>
 			<File
-				RelativePath=".\service_support.h"
+				RelativePath=".\src\service_support.h"
 				>
 			</File>
 			<File
-				RelativePath=".\stdafx.h"
+				RelativePath=".\src\stdafx.h"
 				>
 			</File>
 			<File
-				RelativePath=".\targetver.h"
+				RelativePath=".\src\targetver.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\utils.h"
 				>
 			</File>
 		</Filter>
