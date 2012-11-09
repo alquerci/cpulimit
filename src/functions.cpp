@@ -228,29 +228,3 @@ void __fastcall HaltMich()
         }
     }
 }
-
-WCHAR * CreateConfigPath(const WCHAR *program_path)
-{
-    rsize_t path_size = 0;
-    path_size = wcslen(program_path);
-
-    WCHAR *tmp = NULL;
-    int nbcharexe = 0;
-
-    tmp = (WCHAR *) malloc(sizeof(WCHAR) * (path_size+1));
-
-    wcscpy_s(tmp, path_size+1, program_path);
-    tmp = &tmp[path_size];
-
-    while(*tmp != '\\' && *tmp != '/')
-    {
-        nbcharexe++;
-        tmp--;
-    }
-    tmp++;
-    nbcharexe--;
-
-    wcscpy_s(tmp, wcslen(L"cpulimit.ini")+1, L"cpulimit.ini");
-
-    return tmp-(path_size-nbcharexe);
-}

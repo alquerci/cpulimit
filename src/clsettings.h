@@ -9,4 +9,5 @@ struct ClSettings
     int codeExePriority;
 };
 
+WCHAR * CreateConfigPath(const WCHAR * program_path);
 ClSettings GetSettings(const WCHAR * config_path);
