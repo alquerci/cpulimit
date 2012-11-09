@@ -4,7 +4,7 @@
 #include "stdafx.h"
 
 
-int main(int argc, char **argv)
+int wmain(int argc, wchar_t *argv[])
 {
     if(mystrstr(GetCommandLine(), L"/service"))
     {
@@ -84,7 +84,7 @@ int main(int argc, char **argv)
     }
     else
     {
-        CPULimitMain();
+        CPULimitMain(argc, argv);
     }
 
     ExitProcess(0);

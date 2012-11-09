@@ -27,7 +27,7 @@ VOID WINAPI ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
     SvcStatus.dwCurrentState = SERVICE_RUNNING;
     SetServiceStatus(SvcHandle, &SvcStatus);
     SvcStarted = 1;
-    CPULimitMain();
+    CPULimitMain(dwArgc, lpszArgv);
     SvcStatus.dwCurrentState = SERVICE_STOPPED;
     SetServiceStatus(SvcHandle, &SvcStatus);
 }
