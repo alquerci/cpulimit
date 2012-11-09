@@ -4,7 +4,7 @@
 #include "stdafx.h"
 
 
-int wmain(int argc, wchar_t *argv[])
+int wmain(int argc, WCHAR *argv[])
 {
     if(mystrstr(GetCommandLine(), L"/service"))
     {
@@ -19,7 +19,7 @@ int wmain(int argc, wchar_t *argv[])
         SC_HANDLE sch = OpenSCManager(0, 0, SC_MANAGER_ALL_ACCESS);
         if(sch)
         {
-            wchar_t fpath[1100] = {0};
+            WCHAR fpath[1100] = {0};
             rsize_t fpathsize = 1100;
 
             GetModuleFileName(0, fpath+1, 1023);

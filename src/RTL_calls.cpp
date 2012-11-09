@@ -2,7 +2,7 @@
 
 #include "stdafx.h"
 
-wchar_t* __fastcall mystrstr(const wchar_t *str1, const wchar_t *str2)
+WCHAR* __fastcall mystrstr(const WCHAR *str1, const WCHAR *str2)
 {
     if( (!str1) || (!str2) || (!*str1) || (!*str2) )
     {	
@@ -22,7 +22,7 @@ wchar_t* __fastcall mystrstr(const wchar_t *str1, const wchar_t *str2)
 
         if(str2[i2] == '\0')
         {
-            return (wchar_t*) &str1[(i1 - wcslen(str2))];
+            return (WCHAR*) &str1[(i1 - wcslen(str2))];
         }
 
         i1++;

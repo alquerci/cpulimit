@@ -22,7 +22,7 @@ void __fastcall GetDebugPriv()
     AdjustTokenPrivileges(hToken, FALSE, &tkp, 0,(PTOKEN_PRIVILEGES)NULL, 0);
 }
 
-HANDLE __fastcall ProcByExe(wchar_t *exe, DWORD &pid)
+HANDLE __fastcall ProcByExe(WCHAR *exe, DWORD &pid)
 {
     HANDLE prc=0;
     HANDLE snp=CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -87,7 +87,7 @@ void __fastcall SuspendResumeIt(DWORD pid, bool suspend)
     }
 }
 
-void __fastcall CPULimitMain(int argc, wchar_t *argv[])
+void __fastcall CPULimitMain(int argc, WCHAR *argv[])
 {
     if( OpenMutex(MUTEX_ALL_ACCESS, 0, L"CPULimit_Activated_Mutex") )
     {
@@ -102,21 +102,10 @@ void __fastcall CPULimitMain(int argc, wchar_t *argv[])
     extSuspendProcess = (extSuspendProcessx)GetProcAddress(LoadLibrary(L"ntdll.dll"), "NtSuspendProcess");
 
 
-    WCHAR fpath[1100];
-    rsize_t fpathsize = 1100;
-
-    GetModuleFileName(0, fpath, 1023); 
-    fpath[1023] = 0;
-    WCHAR *tmp = fpath + wcslen(fpath);
-    while(*tmp!='\\')
-    {
-        tmp--;
-    }
-    tmp++;
-
-    wcscpy_s(tmp, fpathsize, L"cpulimit.ini");
-
-    wchar_t exename[261] = {0};
+    WCHAR *fpath = NULL;
+    fpath = CreateConfigPath(argv[0]);
+    
+    WCHAR exename[261] = {0};
     GetPrivateProfileString(L"Settings", L"ExeName", L"", exename, 260, fpath);
     exename[260] = 0;
     DWORD timeon = GetPrivateProfileInt(L"Settings", L"TimeOn", 1000, fpath);
@@ -244,4 +233,30 @@ void __fastcall HaltMich()
             }
         }
     }
+}
+
+WCHAR * CreateConfigPath(const WCHAR *program_path)
+{
+    rsize_t path_size = 0;
+    path_size = wcslen(program_path);
+
+    WCHAR *tmp = NULL;
+    int nbcharexe = 0;
+
+    tmp = (WCHAR *) malloc(sizeof(WCHAR) * (path_size+1));
+
+    wcscpy_s(tmp, path_size+1, program_path);
+    tmp = &tmp[path_size];
+
+    while(*tmp != '\\' && *tmp != '/')
+    {
+        nbcharexe++;
+        tmp--;
+    }
+    tmp++;
+    nbcharexe--;
+
+    wcscpy_s(tmp, wcslen(L"cpulimit.ini")+1, L"cpulimit.ini");
+
+    return tmp-(path_size-nbcharexe);
 }
