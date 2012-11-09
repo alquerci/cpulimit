@@ -15,7 +15,7 @@
 #include "targetver.h"
 
 //#include <iostream>
-//#include <stdlib.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <stdio.h>

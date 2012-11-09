@@ -2,33 +2,33 @@
 
 #include "stdafx.h"
 
-wchar_t *__fastcall mystrstr(wchar_t *str1, wchar_t *str2)
+wchar_t* __fastcall mystrstr(const wchar_t *str1, const wchar_t *str2)
 {
 	if( (!str1) || (!str2) || (!*str1) || (!*str2) )
 	{	
 		return 0;
 	}
 	
-	wchar_t *t1 = str1;
+	int i1 = 0, i2 = 0;
 
-	while(*t1)
+
+	while(str1[i1] != '\0')
 	{
-		wchar_t *z1 = t1, *z2 = str2;
-		
-		while( *z1 && *z2 && (*z1 == *z2) )
+		while( str1[i1] != '\0' && str2[i2] != '\0' && (str1[i1] == str2[i2]) )
 		{
-			z1++;
-			z2++;
+			i1++;
+			i2++;
 		}
 
-		if(!*z2)
+		if(str2[i2] == '\0')
 		{
-			return t1;
+			return (wchar_t*) &str1[(i1 - wcslen(str2))];
 		}
 
-		t1++;
-	 }
-	return 0;
+		i1++;
+	}
+	
+	return NULL;
 }
 
 int __fastcall mystricmp(WCHAR *s1, WCHAR *s2)
