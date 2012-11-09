@@ -4,7 +4,7 @@
 #include "stdafx.h"
 
 
-int main(int argc, TCHAR* argv[])
+int main(int argc, char **argv)
 {
 	if(mystrstr(GetCommandLine(), L"/service"))
 	{
