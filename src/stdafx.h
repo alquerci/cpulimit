@@ -22,5 +22,6 @@
 #include "RTL_calls.h"
 #include "service_support.h"
 #include "cpulimit.h"
+#include "clsettings.h"
 
 #endif // !defined(AFX_STDAFX_H__A9DB83DB_A9FD_11D0_BFD1_444553540000__INCLUDED_)

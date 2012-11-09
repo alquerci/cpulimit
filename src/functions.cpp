@@ -103,23 +103,17 @@ void __fastcall CPULimitMain(int argc, WCHAR *argv[])
 
 
     WCHAR *fpath = NULL;
+    ClSettings settings;
     fpath = CreateConfigPath(argv[0]);
-    
-    WCHAR exename[261] = {0};
-    GetPrivateProfileString(L"Settings", L"ExeName", L"", exename, 260, fpath);
-    exename[260] = 0;
-    DWORD timeon = GetPrivateProfileInt(L"Settings", L"TimeOn", 1000, fpath);
-    DWORD timeoff = GetPrivateProfileInt(L"Settings", L"TimeOff", 1000, fpath);
-    DWORD hipr = GetPrivateProfileInt(L"Settings", L"HighPriority", 0, fpath);
-    DWORD CanUseNtDll = GetPrivateProfileInt(L"Settings", L"CanUseNtDll", 1, fpath);
-    DWORD ExePriority = GetPrivateProfileInt(L"Settings", L"ExePriority", 1, fpath);
+    settings = GetSettings(fpath);
 
-    if( exename[0] && (timeon) && (timeoff >= 0) )
+
+    if( settings.ExeName[0] && (settings.nbTimeOn) && (settings.nbTimeOff >= 0) )
     {
         if(extOpenThread)
         {
             GetDebugPriv();
-            if(hipr)
+            if(settings.isHighPriority)
             {
                 SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
             }
@@ -128,7 +122,7 @@ void __fastcall CPULimitMain(int argc, WCHAR *argv[])
                 extSetProcessWorkingSetSize(GetCurrentProcess(),-1,-1);
             }
             HANDLE prc = 0;
-            DWORD pid;
+            DWORD pid = NULL;
             DWORD prc_priority = NORMAL_PRIORITY_CLASS;
             while(! OpenMutex( MUTEX_ALL_ACCESS, 0, L"CPULimit_Deactivate_Mutex") )
             {
@@ -139,11 +133,11 @@ void __fastcall CPULimitMain(int argc, WCHAR *argv[])
                 }
                 if(!prc)
                 {
-                    prc = ProcByExe(exename, pid);
+                    prc = ProcByExe(settings.ExeName, pid);
 
                     if(prc)
                     {
-                        switch (ExePriority)
+                        switch (settings.codeExePriority)
                         {
                         case 0:
                             prc_priority = IDLE_PRIORITY_CLASS;
@@ -158,15 +152,15 @@ void __fastcall CPULimitMain(int argc, WCHAR *argv[])
                             prc_priority = NORMAL_PRIORITY_CLASS;
                             break;
                         }
-                        wprintf(L"\n> %s is running.", exename);
+                        wprintf(L"\n> %s is running.", settings.ExeName);
                         SetPriorityClass(prc, prc_priority);
                     }
                 }
                 if(prc)
                 {
-                    if(timeoff != 0)
+                    if(settings.nbTimeOff != 0)
                     {
-                        if(extSuspendProcess && CanUseNtDll)
+                        if(extSuspendProcess && settings.isNtDll)
                         {
                             extSuspendProcess(prc);
                         }
@@ -175,9 +169,9 @@ void __fastcall CPULimitMain(int argc, WCHAR *argv[])
                             SuspendResumeIt(pid, 1);
                         }
                         wprintf(L"!");
-                        Sleep(timeoff);
+                        Sleep(settings.nbTimeOff);
                         wprintf(L".");
-                        if(extResumeProcess && CanUseNtDll)
+                        if(extResumeProcess && settings.isNtDll)
                         {
                             extResumeProcess(prc);
                         }
@@ -185,7 +179,7 @@ void __fastcall CPULimitMain(int argc, WCHAR *argv[])
                         {
                             SuspendResumeIt(pid, 0);
                         }
-                        Sleep(timeon);
+                        Sleep(settings.nbTimeOn);
                     }
                     else
                     {
@@ -195,8 +189,8 @@ void __fastcall CPULimitMain(int argc, WCHAR *argv[])
                 }
                 else
                 {
-                    wprintf(L"Wait for openning %s during %u ms...\n", exename, timeoff+timeon);
-                    Sleep(timeoff+timeon);
+                    wprintf(L"Wait for openning %s during %u ms...\n", settings.ExeName, settings.nbTimeOff+settings.nbTimeOn);
+                    Sleep(settings.nbTimeOff+settings.nbTimeOn);
                 }
             }
         }
