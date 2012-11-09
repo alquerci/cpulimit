@@ -16,7 +16,7 @@
 
 //#include <iostream>
 //#include <stdlib.h>
-#include <string>
+#include <string.h>
 
 #include <stdio.h>
 //#include <tchar.h>

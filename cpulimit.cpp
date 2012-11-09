@@ -19,12 +19,14 @@ int main(int argc, TCHAR* argv[])
 		SC_HANDLE sch = OpenSCManager(0, 0, SC_MANAGER_ALL_ACCESS);
 		if(sch)
 		{
-			wchar_t fpath[1100];
+			wchar_t fpath[1100] = {0};
+			rsize_t fpathsize = 1100;			
+
 			GetModuleFileName(0, fpath+1, 1023);
 			fpath[0] = '\"';
 			fpath[1023] = 0;
-
-			wcscat(fpath, L"\" /service");
+			
+			wcscat_s(fpath, fpathsize,L"\" /service");
 			SC_HANDLE sh = CreateService(sch, L"CPULimit", L"CPULimit", SERVICE_ALL_ACCESS, SERVICE_WIN32_OWN_PROCESS|SERVICE_INTERACTIVE_PROCESS, SERVICE_AUTO_START, SERVICE_ERROR_NORMAL, fpath, 0, 0, 0, 0, 0);
 			if(sh)
 			{
