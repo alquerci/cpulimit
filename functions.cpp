@@ -103,6 +103,8 @@ void __fastcall CPULimitMain()
 
 
 	WCHAR fpath[1100];
+	rsize_t fpathsize = 1100;
+
 	GetModuleFileName(0, fpath, 1023); 
 	fpath[1023] = 0;
 	WCHAR *tmp = fpath + wcslen(fpath);
@@ -112,8 +114,7 @@ void __fastcall CPULimitMain()
 	}
 	tmp++;
 
-	wcscpy(tmp, L"cpulimit.ini");
-
+	wcscpy_s(tmp, fpathsize, L"cpulimit.ini");
 
 	wchar_t exename[261] = {0};
 	GetPrivateProfileString(L"Settings", L"ExeName", L"", exename, 260, fpath);
