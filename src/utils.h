@@ -1,1 +1,0 @@
-void char2wc(const char *orig, wchar_t *wcstring);

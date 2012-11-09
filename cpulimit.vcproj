@@ -202,10 +202,14 @@
 						UsePrecompiledHeader="1"
 					/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\src\utils.cpp"
-				>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"
+					/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter
@@ -235,10 +239,6 @@
 			</File>
 			<File
 				RelativePath=".\src\targetver.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\utils.h"
 				>
 			</File>
 		</Filter>

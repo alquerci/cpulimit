@@ -10,4 +10,3 @@
 #ifndef _WIN32_WINNT            // Spécifie que la plateforme minimale requise est Windows Vista.
 #define _WIN32_WINNT 0x0600     // Attribuez la valeur appropriée à cet élément pour cibler d'autres versions de Windows.
 #endif
-
