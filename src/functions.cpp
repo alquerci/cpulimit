@@ -219,12 +219,7 @@ void __fastcall CPULimitMain(int argc, WCHAR *argv[])
     }
 
     MyExceptionHandler::SetSettings(&settings);
-    signal(SIGINT, MyExceptionHandler::OnExit);
-    signal(SIGTERM, MyExceptionHandler::OnExit);
-    signal(SIGBREAK, MyExceptionHandler::OnExit);
-    signal(SIGILL, MyExceptionHandler::OnExit);
-    signal(SIGABRT, MyExceptionHandler::OnExit);
-    signal(SIGABRT_COMPAT, MyExceptionHandler::OnExit);
+    MyExceptionHandler::SignalRegister();
 
     if( (settings.ExeName[0] || settings.pid) && (settings.nbTimeOn) && (settings.nbTimeOff >= 0) )
     {

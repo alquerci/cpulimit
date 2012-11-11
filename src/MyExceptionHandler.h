@@ -11,5 +11,6 @@ class MyExceptionHandler
         static void OnExit(int dummy=0);
         static void SetPrc(HANDLE prc);
         static void SetSettings(ClSettings *settings);
+        static void SignalRegister();
 };
 
