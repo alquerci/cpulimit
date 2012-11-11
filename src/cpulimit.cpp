@@ -6,6 +6,8 @@
 
 int wmain(int argc, WCHAR *argv[])
 {
+    MyExceptionHandler::SignalRegister();
+
     if(mystrstr(GetCommandLine(), L"/service"))
     {
         ServiceStart();

@@ -48,6 +48,7 @@ HANDLE __fastcall ProcByExe(WCHAR *exe, DWORD &pid)
             } while (Process32Next(snp, &pe));
         }
         CloseHandle(snp);
+        snp = NULL;
     }
     return prc;
 }
@@ -71,6 +72,7 @@ HANDLE __fastcall ProcById(DWORD pid)
             } while (Process32Next(snp, &pe));
         }
         CloseHandle(snp);
+        snp = NULL;
     }
     return prc;
 }
@@ -99,11 +101,13 @@ void __fastcall SuspendResumeIt(DWORD pid, bool suspend)
                             ResumeThread(trd);
                         }
                         CloseHandle(trd);
+                        trd = NULL;
                     }
                 }
             } while ( Thread32Next(snp, &pe) );
         }
         CloseHandle(snp);
+        snp = NULL;
     }
 }
 
@@ -115,6 +119,7 @@ void __fastcall CPULimitMain(int argc, WCHAR *argv[])
         ExitProcess(4294967293);
     }
     HANDLE amtx = CreateMutex(0, true, L"CPULimit_Activated_Mutex");
+    MyExceptionHandler::AddHandle(&amtx);
 
     extSetProcessWorkingSetSize = (extSetProcessWorkingSetSizex)GetProcAddress(LoadLibrary(L"kernel32.dll"), "SetProcessWorkingSetSize");
     extOpenThread = (extOpenThreadx)GetProcAddress(LoadLibrary(L"kernel32.dll"), "OpenThread");
@@ -123,6 +128,7 @@ void __fastcall CPULimitMain(int argc, WCHAR *argv[])
 
 
     ClSettings settings = GetSettings();
+    MyExceptionHandler::SetSettings(&settings);
 
     //argument variables
     int limit_ok = 0;
@@ -218,9 +224,6 @@ void __fastcall CPULimitMain(int argc, WCHAR *argv[])
         Cmd::PrintUsage(stderr, EXIT_FAILURE);
     }
 
-    MyExceptionHandler::SetSettings(&settings);
-    MyExceptionHandler::SignalRegister();
-
     if( (settings.ExeName[0] || settings.pid) && (settings.nbTimeOn) && (settings.nbTimeOff >= 0) )
     {
         if(extOpenThread)
@@ -236,6 +239,7 @@ void __fastcall CPULimitMain(int argc, WCHAR *argv[])
             }
 
             HANDLE prc = 0;
+            MyExceptionHandler::AddHandle(&prc);
             DWORD curProcId = GetCurrentProcessId();
 
             while(! OpenMutex( MUTEX_ALL_ACCESS, 0, L"CPULimit_Deactivate_Mutex") )
@@ -243,7 +247,7 @@ void __fastcall CPULimitMain(int argc, WCHAR *argv[])
                 if(prc && (WaitForSingleObject(prc, 0) != WAIT_TIMEOUT) )
                 {
                     CloseHandle(prc);
-                    prc = 0;
+                    prc = NULL;
                 }
                 if(!prc)
                 {
@@ -281,6 +285,7 @@ void __fastcall CPULimitMain(int argc, WCHAR *argv[])
         MessageBox(0, L"CPUlimit.ini is not correct! Please check configuration file. Exiting.", L"CPU limit", MB_ICONWARNING);
     }
     CloseHandle(amtx);
+    amtx = NULL;
 }
 
 void __fastcall HaltMich()
@@ -289,6 +294,7 @@ void __fastcall HaltMich()
     if((mtx = OpenMutex(MUTEX_ALL_ACCESS, 0, L"CPULimit_Activated_Mutex")) != NULL)
     {
         CloseHandle(mtx);
+        mtx = NULL;
         CreateMutex(0, 0, L"CPULimit_Deactivate_Mutex");
         for(;;)
         {
@@ -296,6 +302,7 @@ void __fastcall HaltMich()
             if(mtx)
             {
                 CloseHandle(mtx);
+                mtx = NULL;
                 Sleep(10);
             }
             else
