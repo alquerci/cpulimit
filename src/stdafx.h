@@ -23,7 +23,6 @@
 #include "targetver.h"
 #include "functions.h"
 #include "RTL_calls.h"
-#include "service_support.h"
 #include "cpulimit.h"
 #include "comandline.h"
 #include "MyExceptionHandler.h"

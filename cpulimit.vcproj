@@ -255,19 +255,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\service_support.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-						PrecompiledHeaderThrough=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\src\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -323,10 +310,6 @@
 			</File>
 			<File
 				RelativePath=".\src\RTL_calls.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\service_support.h"
 				>
 			</File>
 			<File

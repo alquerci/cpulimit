@@ -4,8 +4,7 @@ void __fastcall GetDebugPriv();
 HANDLE __fastcall ProcByExe(WCHAR *exe, DWORD &pid);
 HANDLE __fastcall ProcById(DWORD pid);
 void __fastcall SuspendResumeIt(DWORD pid, bool suspend);
-void __fastcall CPULimitMain(int argc, WCHAR *argv[]);
-void __fastcall HaltMich();
+void __fastcall cpulimitMain(int argc, WCHAR *argv[]);
 
 void process_limiter(ClSettings settings, HANDLE prc);
 HANDLE process_finder(ClSettings *settings, int pid_ok);

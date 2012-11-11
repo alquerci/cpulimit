@@ -111,7 +111,7 @@ void __fastcall SuspendResumeIt(DWORD pid, bool suspend)
     }
 }
 
-void __fastcall CPULimitMain(int argc, WCHAR *argv[])
+void __fastcall cpulimitMain(int argc, WCHAR *argv[])
 {
     if( OpenMutex(MUTEX_ALL_ACCESS, 0, L"CPULimit_Activated_Mutex") )
     {
