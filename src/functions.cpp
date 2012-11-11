@@ -115,7 +115,7 @@ void __fastcall cpulimitMain(int argc, WCHAR *argv[])
 {
     if( OpenMutex(MUTEX_ALL_ACCESS, 0, L"CPULimit_Activated_Mutex") )
     {
-        MessageBox(0, L"CPULimit.exe already started!", L"CPULimit", MB_ICONWARNING);
+        fwprintf(stderr, L"cpulimit already started!");
         ExitProcess(4294967293);
     }
     HANDLE amtx = CreateMutex(0, true, L"CPULimit_Activated_Mutex");
@@ -224,66 +224,60 @@ void __fastcall cpulimitMain(int argc, WCHAR *argv[])
         Cmd::PrintUsage(stderr, EXIT_FAILURE);
     }
 
-    if( (settings.ExeName[0] || settings.pid) && (settings.nbTimeOn) && (settings.nbTimeOff >= 0) )
+    if(extOpenThread)
     {
-        if(extOpenThread)
+        GetDebugPriv();
+        if(settings.isHighPriority)
         {
-            GetDebugPriv();
-            if(settings.isHighPriority)
-            {
-                SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
-            }
-            if(extSetProcessWorkingSetSize)
-            {
-                extSetProcessWorkingSetSize(GetCurrentProcess(),-1,-1);
-            }
-
-            HANDLE prc = 0;
-            MyExceptionHandler::AddHandle(&prc);
-            DWORD curProcId = GetCurrentProcessId();
-
-            while(! OpenMutex( MUTEX_ALL_ACCESS, 0, L"CPULimit_Deactivate_Mutex") )
-            {
-                if(prc && (WaitForSingleObject(prc, 0) != WAIT_TIMEOUT) )
-                {
-                    CloseHandle(prc);
-                    prc = NULL;
-                }
-                if(!prc)
-                {
-                    prc = process_finder(&settings, pid_ok);
-                }
-
-                // Control process
-                if(prc)
-                {
-                    if(settings.pid == curProcId)
-                    {
-                        printf("Target process %d is cpulimit itself! Aborting because it makes no sense\n", curProcId);
-                        ExitProcess(EXIT_FAILURE);
-                    }
-                    process_limiter(settings, prc);
-                }
-                else
-                {
-                    // Wait process
-                    if (settings.lazy)
-                    {
-                        break;
-                    }
-                    Sleep(2000);
-                }
-            }
+            SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
         }
-        else
+        if(extSetProcessWorkingSetSize)
         {
-            MessageBox(0, L"Your system is not supported. Exiting.", L"CPU limit", MB_ICONWARNING);
+            extSetProcessWorkingSetSize(GetCurrentProcess(),-1,-1);
+        }
+
+        HANDLE prc = 0;
+        MyExceptionHandler::AddHandle(&prc);
+        DWORD curProcId = GetCurrentProcessId();
+
+        while(! OpenMutex( MUTEX_ALL_ACCESS, 0, L"CPULimit_Deactivate_Mutex") )
+        {
+            if(prc && (WaitForSingleObject(prc, 0) != WAIT_TIMEOUT) )
+            {
+                CloseHandle(prc);
+                prc = NULL;
+            }
+            if(!prc)
+            {
+                prc = process_finder(&settings, pid_ok);
+            }
+
+            // Control process
+            if(prc)
+            {
+                if(settings.pid == curProcId)
+                {
+                    printf("Target process %d is cpulimit itself! Aborting because it makes no sense\n", curProcId);
+                    ExitProcess(EXIT_FAILURE);
+                }
+                process_limiter(settings, prc);
+            }
+            else
+            {
+                // Wait process
+                if (settings.lazy)
+                {
+                    break;
+                }
+                Sleep(2000);
+            }
         }
     }
     else
     {
-        MessageBox(0, L"CPUlimit.ini is not correct! Please check configuration file. Exiting.", L"CPU limit", MB_ICONWARNING);
+        fwprintf(stderr,L"Your system is not supported. Exiting.");
     }
+
     CloseHandle(amtx);
     amtx = NULL;
 }
