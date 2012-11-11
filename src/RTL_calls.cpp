@@ -31,7 +31,7 @@ WCHAR* __fastcall mystrstr(const WCHAR *str1, const WCHAR *str2)
     return NULL;
 }
 
-int __fastcall mystricmp(WCHAR *s1, WCHAR *s2)
+int __fastcall mystricmp(WCHAR *s1, const WCHAR *s2)
 {
     switch( CompareString(LOCALE_USER_DEFAULT, NORM_IGNORECASE, s1, -1, s2, -1) )
     {

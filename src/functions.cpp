@@ -1,11 +1,5 @@
 #include "stdafx.h"
 
-typedef DWORD (WINAPI *extSetProcessWorkingSetSizex)(HANDLE, int,int);
-typedef HANDLE (WINAPI *extOpenThreadx)(DWORD, BOOL, DWORD);
-typedef DWORD (WINAPI *extResumeProcessx)(HANDLE);
-typedef DWORD (WINAPI *extSuspendProcessx)(HANDLE);
-
-
 extSetProcessWorkingSetSizex extSetProcessWorkingSetSize;
 extOpenThreadx extOpenThread;
 extResumeProcessx extResumeProcess;
@@ -24,22 +18,24 @@ void __fastcall GetDebugPriv()
 
 HANDLE __fastcall ProcByExe(WCHAR *exe, DWORD &pid)
 {
-    HANDLE prc=0;
-    HANDLE snp=CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+
+    HANDLE prc = 0;
+    HANDLE snp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+
     if( snp != INVALID_HANDLE_VALUE )
     {
-        PROCESSENTRY32 pe={sizeof(PROCESSENTRY32), 0};
+        PROCESSENTRY32 pe = {sizeof(PROCESSENTRY32), 0};
         if( Process32First(snp, &pe) )
         {
             do
             {
                 WCHAR *t = pe.szExeFile + wcslen(pe.szExeFile);
-                while( (t > pe.szExeFile) && (*t != '\\') )
+                while( (t > pe.szExeFile) && (*t != '\\') && (*t != '/') )
                 {
                     t--;
                 }
 
-                if( *t == '\\' )
+                if( *t == '\\' && (*t != '/') )
                 {
                     t++;
                 }
@@ -55,6 +51,30 @@ HANDLE __fastcall ProcByExe(WCHAR *exe, DWORD &pid)
     }
     return prc;
 }
+
+HANDLE __fastcall ProcById(DWORD pid)
+{
+    HANDLE prc = 0;
+    HANDLE snp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if( snp != INVALID_HANDLE_VALUE )
+    {
+        PROCESSENTRY32 pe = {sizeof(PROCESSENTRY32), 0};
+        if( Process32First(snp, &pe) )
+        {
+            do
+            {
+                if( pid == pe.th32ProcessID )
+                {
+                    prc = OpenProcess(PROCESS_ALL_ACCESS, 0, pe.th32ProcessID);
+                    break;
+                }
+            } while (Process32Next(snp, &pe));
+        }
+        CloseHandle(snp);
+    }
+    return prc;
+}
+
 void __fastcall SuspendResumeIt(DWORD pid, bool suspend)
 {
     HANDLE snp = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
@@ -89,35 +109,6 @@ void __fastcall SuspendResumeIt(DWORD pid, bool suspend)
 
 void __fastcall CPULimitMain(int argc, WCHAR *argv[])
 {
-    //parse arguments
-    int next_option;
-    int option_index = 0;
-    //A string listing valid short options letters
-    const WCHAR* short_options = L"h";
-    //An array describing valid long options
-    const struct option long_options[] = {
-        { L"help", no_argument, NULL, L'h' },
-        { 0, 0, 0, 0 }
-    };
-    do 
-    {
-        next_option = getopt_long(argc, argv, short_options,long_options, &option_index);
-        switch(next_option) 
-        {
-            case 'h':
-                Cmd::PrintUsage(stdout, 1);
-                break;
-            case '?':
-                Cmd::PrintUsage(stderr, 1);
-                break;
-            case -1:
-                break;
-            default:
-                abort();
-        }
-    } while(next_option != -1);
-
-
     if( OpenMutex(MUTEX_ALL_ACCESS, 0, L"CPULimit_Activated_Mutex") )
     {
         MessageBox(0, L"CPULimit.exe already started!", L"CPULimit", MB_ICONWARNING);
@@ -131,13 +122,111 @@ void __fastcall CPULimitMain(int argc, WCHAR *argv[])
     extSuspendProcess = (extSuspendProcessx)GetProcAddress(LoadLibrary(L"ntdll.dll"), "NtSuspendProcess");
 
 
-    WCHAR *fpath = NULL;
-    ClSettings settings;
-    fpath = CreateConfigPath(argv[0]);
-    settings = GetSettings(fpath);
+    ClSettings settings = GetSettings();
 
+    //argument variables
+    int limit_ok = 0;
+    int exe_ok = 0;
+    int pid_ok = 0;
 
-    if( settings.ExeName[0] && (settings.nbTimeOn) && (settings.nbTimeOff >= 0) )
+    WCHAR *exe = NULL;
+    int pid = 0;
+    int perclimit = 0;
+
+    //parse arguments
+    int next_option;
+    int option_index = 0;
+    //A string listing valid short options letters
+    const WCHAR* short_options = L"+p:e:l:Izh";
+    //An array describing valid long options
+    const struct option long_options[] = {
+        { L"pid", required_argument, NULL, L'p' },
+        { L"exe", required_argument, NULL, L'e' },
+        { L"limit", required_argument, NULL, L'l' },
+        { L"lazy", no_argument, NULL, L'z' },
+        { L"idle", no_argument, NULL, L'I' },
+        { L"help", no_argument, NULL, L'h' },
+        { 0, 0, 0, 0 }
+    };
+    do
+    {
+        next_option = getopt_long(argc, argv, short_options, long_options, &option_index);
+        switch(next_option) 
+        {
+            case 'p':
+                pid = _wtoi(optarg);
+                pid_ok = 1;
+                break;
+            case 'e':
+                exe = optarg;
+                exe_ok = 1;
+                break;
+            case 'l':
+                perclimit = _wtoi(optarg);
+                limit_ok = 1;
+                break;
+            case 'z':
+                settings.lazy = 1;
+                break;
+            case 'I':
+                settings.codeExePriority = 0;
+                break;
+            case 'h':
+                Cmd::PrintUsage(stdout, EXIT_FAILURE);
+                break;
+            case '?':
+                Cmd::PrintUsage(stderr, EXIT_FAILURE);
+                break;
+            case -1:
+                break;
+            default:
+                abort();
+        }
+    } while(next_option != -1);
+
+    if (limit_ok)
+    {
+        if (perclimit < 1 || perclimit > 100)
+        {
+            fprintf(stderr,"Error: limit must be in the range 1-100\n");
+            Cmd::PrintUsage(stderr, EXIT_FAILURE);
+        }
+        else
+        {
+            settings.nbTimeOn = perclimit * 10;
+            settings.nbTimeOff = 1000 - settings.nbTimeOn;
+        }
+    }
+
+    if (exe_ok && pid_ok)
+    {
+        fprintf(stderr,"Error: You must specify exactly one target process, either by name or pid.\n");
+        Cmd::PrintUsage(stderr, EXIT_FAILURE);
+    }
+    else if(exe_ok)
+    {
+        settings.ExeName = exe;
+    }
+    else if (pid_ok)
+    {
+        settings.lazy = 1;
+        settings.pid = pid;
+    }
+    else
+    {
+        fprintf(stderr,"Error: You must specify one target process, either by name or pid\n");
+        Cmd::PrintUsage(stderr, EXIT_FAILURE);
+    }
+
+    MyExceptionHandler::SetSettings(&settings);
+    signal(SIGINT, MyExceptionHandler::OnExit);
+    signal(SIGTERM, MyExceptionHandler::OnExit);
+    signal(SIGBREAK, MyExceptionHandler::OnExit);
+    signal(SIGILL, MyExceptionHandler::OnExit);
+    signal(SIGABRT, MyExceptionHandler::OnExit);
+    signal(SIGABRT_COMPAT, MyExceptionHandler::OnExit);
+
+    if( (settings.ExeName[0] || settings.pid) && (settings.nbTimeOn) && (settings.nbTimeOff >= 0) )
     {
         if(extOpenThread)
         {
@@ -150,9 +239,10 @@ void __fastcall CPULimitMain(int argc, WCHAR *argv[])
             {
                 extSetProcessWorkingSetSize(GetCurrentProcess(),-1,-1);
             }
+
             HANDLE prc = 0;
-            DWORD pid = NULL;
-            DWORD prc_priority = NORMAL_PRIORITY_CLASS;
+            DWORD curProcId = GetCurrentProcessId();
+
             while(! OpenMutex( MUTEX_ALL_ACCESS, 0, L"CPULimit_Deactivate_Mutex") )
             {
                 if(prc && (WaitForSingleObject(prc, 0) != WAIT_TIMEOUT) )
@@ -162,64 +252,27 @@ void __fastcall CPULimitMain(int argc, WCHAR *argv[])
                 }
                 if(!prc)
                 {
-                    prc = ProcByExe(settings.ExeName, pid);
-
-                    if(prc)
-                    {
-                        switch (settings.codeExePriority)
-                        {
-                        case 0:
-                            prc_priority = IDLE_PRIORITY_CLASS;
-                            break;
-                        case 2:
-                            prc_priority = HIGH_PRIORITY_CLASS;
-                            break;
-                        case 3:
-                            prc_priority = REALTIME_PRIORITY_CLASS;
-                            break;
-                        default:
-                            prc_priority = NORMAL_PRIORITY_CLASS;
-                            break;
-                        }
-                        wprintf(L"\n> %s is running.", settings.ExeName);
-                        SetPriorityClass(prc, prc_priority);
-                    }
+                    prc = process_finder(&settings, pid_ok);
                 }
+
+                // Control process
                 if(prc)
                 {
-                    if(settings.nbTimeOff != 0)
+                    if(settings.pid == curProcId)
                     {
-                        if(extSuspendProcess && settings.isNtDll)
-                        {
-                            extSuspendProcess(prc);
-                        }
-                        else
-                        {
-                            SuspendResumeIt(pid, 1);
-                        }
-                        wprintf(L"!");
-                        Sleep(settings.nbTimeOff);
-                        wprintf(L".");
-                        if(extResumeProcess && settings.isNtDll)
-                        {
-                            extResumeProcess(prc);
-                        }
-                        else
-                        {
-                            SuspendResumeIt(pid, 0);
-                        }
-                        Sleep(settings.nbTimeOn);
+                        printf("Target process %d is cpulimit itself! Aborting because it makes no sense\n", curProcId);
+                        ExitProcess(EXIT_FAILURE);
                     }
-                    else
-                    {
-                        wprintf(L".");
-                        Sleep(2000);
-                    }
+                    process_limiter(settings, prc);
                 }
                 else
                 {
-                    wprintf(L"Wait for openning %s during %u ms...\n", settings.ExeName, settings.nbTimeOff+settings.nbTimeOn);
-                    Sleep(settings.nbTimeOff+settings.nbTimeOn);
+                    // Wait process
+                    if (settings.lazy)
+                    {
+                        break;
+                    }
+                    Sleep(2000);
                 }
             }
         }
@@ -256,4 +309,72 @@ void __fastcall HaltMich()
             }
         }
     }
+}
+
+void process_limiter(ClSettings settings, HANDLE prc)
+{
+    if(settings.nbTimeOff > 0)
+    {
+        if(extSuspendProcess && settings.isNtDll)
+        {
+            extSuspendProcess(prc);
+        }
+        else
+        {
+            SuspendResumeIt(settings.pid, 1);
+        }
+
+        Sleep(settings.nbTimeOff);
+
+        if(extResumeProcess && settings.isNtDll)
+        {
+            extResumeProcess(prc);
+        }
+        else
+        {
+            SuspendResumeIt(settings.pid, 0);
+        }
+        Sleep(settings.nbTimeOn);
+    }
+    else
+    {
+        // Always running;
+        Sleep(2000);
+    }
+}
+
+HANDLE process_finder(ClSettings *settings, int pid_ok)
+{
+    HANDLE prc = 0;
+    DWORD prc_priority = NORMAL_PRIORITY_CLASS;
+
+    if (pid_ok)
+    {
+        prc = ProcById(settings->pid);
+    }
+    else
+    {
+        prc = ProcByExe(settings->ExeName, settings->pid);
+    }
+
+    if(prc)
+    {
+        fprintf(stdout, "Process %d found.\n", settings->pid);
+        switch (settings->codeExePriority)
+        {
+        case 0:
+            prc_priority = IDLE_PRIORITY_CLASS;
+            break;
+        default:
+            prc_priority = NORMAL_PRIORITY_CLASS;
+            break;
+        }
+        SetPriorityClass(prc, prc_priority);
+    }
+    else
+    {
+        fprintf(stderr, "No process found.\n");
+    }
+
+    return prc;
 }

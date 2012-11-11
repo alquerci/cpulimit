@@ -3,13 +3,14 @@
 typedef struct ClSettings ClSettings;
 struct ClSettings
 {
-    WCHAR ExeName[261];
+    WCHAR *ExeName;
+    DWORD pid;
     int nbTimeOn;
     int nbTimeOff;
     int isHighPriority;
     int isNtDll;
     int codeExePriority;
+    int lazy;
 };
 
-WCHAR * CreateConfigPath(const WCHAR * program_path);
-ClSettings GetSettings(const WCHAR * config_path);
+ClSettings GetSettings();

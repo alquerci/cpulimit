@@ -84,7 +84,7 @@ int wmain(int argc, WCHAR *argv[])
     }
     else
     {
-        CPULimitMain(argc, argv);
+         CPULimitMain(argc, argv);
     }
 
     ExitProcess(0);

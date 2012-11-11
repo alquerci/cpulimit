@@ -17,17 +17,20 @@
 #include <string.h>
 #include <stdio.h>
 #include <Tlhelp32.h>
+#include <signal.h>
 
+#include "clsettings.h"
 #include "targetver.h"
 #include "functions.h"
 #include "RTL_calls.h"
 #include "service_support.h"
 #include "cpulimit.h"
-#include "clsettings.h"
 #include "comandline.h"
+#include "MyExceptionHandler.h"
 
 
 // vendor
 #include "../vendor/ermshiperete/getopt/getoptLib/getopt.h"
+
 
 #endif // !defined(AFX_STDAFX_H__A9DB83DB_A9FD_11D0_BFD1_444553540000__INCLUDED_)

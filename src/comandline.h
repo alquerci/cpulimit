@@ -1,4 +1,5 @@
 // CommandLine interface
+#pragma once
 
 class Cmd 
 {
