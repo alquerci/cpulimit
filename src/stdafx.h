@@ -29,11 +29,7 @@
 
 
 // vendor
-#ifndef __INSIDE_CYGWIN__
-    #include "../vendor/ermshiperete/getopt/getoptLib/getopt.h"
-#else
-    #include <getopt.h>
-#endif
+#include "../vendor/ermshiperete/getopt/getoptLib/getopt.h"
 
 
 #endif // !defined(AFX_STDAFX_H__A9DB83DB_A9FD_11D0_BFD1_444553540000__INCLUDED_)

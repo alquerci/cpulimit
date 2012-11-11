@@ -47,13 +47,9 @@ void MyExceptionHandler::OnExit(int dummy)
 void MyExceptionHandler::SignalRegister()
 {
     signal(SIGINT, MyExceptionHandler::OnExit);
-    signal(SIGTERM, MyExceptionHandler::OnExit);
-    signal(SIGABRT, MyExceptionHandler::OnExit);
-
-#ifdef SIGBREAK
+    //signal(SIGILL, MyExceptionHandler::OnExit);
+    //signal(SIGTERM, MyExceptionHandler::OnExit);
     signal(SIGBREAK, MyExceptionHandler::OnExit);
-#endif
-#ifdef SIGABRT_COMPAT
+    signal(SIGABRT, MyExceptionHandler::OnExit);
     signal(SIGABRT_COMPAT, MyExceptionHandler::OnExit);
-#endif
 }
