@@ -13,6 +13,7 @@ AC_PROG_MAKE_SET
 AC_CONFIG_FILES([
         Makefile
         src/Makefile
+        vendor/ermshiperete/getopt/getoptLib/Makefile
         ])
 
 AC_OUTPUT

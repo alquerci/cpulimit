@@ -1,1 +1,2 @@
-SUBDIRS=src
+SUBDIRS=src vendor/ermshiperete/getopt/getoptLib
+
