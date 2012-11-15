@@ -7,8 +7,8 @@ Config::Config(int argc, WCHAR **argv)
     this->m_isHighPriority = 1;
     this->m_isNtDll = 1;
     this->m_isLazy = 0;
-    this->m_nbTimeOff = 400;
-    this->m_nbTimeOn = 600;
+    this->m_nbTimeOff = 0;
+    this->m_nbTimeOn = 0;
     this->m_pid = 0;
 
     this->GetOpt(argc, argv);
@@ -21,13 +21,11 @@ Config::~Config(void)
 void Config::GetOpt(int argc, WCHAR **argv)
 {
     //argument variables
-    int limit_ok = 0;
     int exe_ok = 0;
     int pid_ok = 0;
 
     WCHAR *exe = NULL;
     int pid = 0;
-    int perclimit = 0;
 
     //parse arguments
     int next_option;
@@ -44,6 +42,7 @@ void Config::GetOpt(int argc, WCHAR **argv)
         { L"help", no_argument, NULL, L'h' },
         { 0, 0, 0, 0 }
     };
+
     do
     {
         next_option = getopt_long(argc, argv, short_options, long_options, &option_index);
@@ -58,8 +57,7 @@ void Config::GetOpt(int argc, WCHAR **argv)
                 exe_ok = 1;
                 break;
             case 'l':
-                perclimit = _wtoi(optarg);
-                limit_ok = 1;
+                this->SetLimit(_wtoi(optarg));
                 break;
             case 'z':
                 this->SetLazy(1);
@@ -68,7 +66,7 @@ void Config::GetOpt(int argc, WCHAR **argv)
                 this->SetCodeExePriority(0);
                 break;
             case 'h':
-                Cmd::PrintUsage(stdout, EXIT_FAILURE);
+                Cmd::PrintUsage(stdout, EXIT_SUCCESS);
                 break;
             case '?':
                 Cmd::PrintUsage(stderr, EXIT_FAILURE);
@@ -80,26 +78,12 @@ void Config::GetOpt(int argc, WCHAR **argv)
         }
     } while(next_option != -1);
 
-    if (limit_ok)
-    {
-        if (perclimit < 1 || perclimit > 100)
-        {
-            fprintf(stderr,"Error: limit must be in the range 1-100\n");
-            Cmd::PrintUsage(stderr, EXIT_FAILURE);
-        }
-        else
-        {
-            this->SetTimeOn(perclimit * 10);
-            this->SetTimeOff(1000 - this->GetTimeOn());
-        }
-    }
-
     if (exe_ok && pid_ok)
     {
-        fprintf(stderr,"Error: You must specify exactly one target process, either by name or pid.\n");
+        fprintf(stderr, "Error: You must specify exactly one target process, either by name or pid.\n");
         Cmd::PrintUsage(stderr, EXIT_FAILURE);
     }
-    else if(exe_ok)
+    else if (exe_ok)
     {
         this->SetExeName(exe);
     }
@@ -110,7 +94,7 @@ void Config::GetOpt(int argc, WCHAR **argv)
     }
     else
     {
-        fprintf(stderr,"Error: You must specify one target process, either by name or pid\n");
+        fprintf(stderr, "Error: You must specify one target process, either by name or pid.\n");
         Cmd::PrintUsage(stderr, EXIT_FAILURE);
     }
 
@@ -126,14 +110,18 @@ void Config::SetProcessId(DWORD p)
     this->m_pid = p;
 }
 
-void Config::SetTimeOn(int ton)
+void Config::SetLimit(int l)
 {
-    this->m_nbTimeOn = ton;
-}
-
-void Config::SetTimeOff(int toff)
-{
-    this->m_nbTimeOff = toff;
+    if (l < 1 || l > 100)
+    {
+        fprintf(stderr,"Error: Limit must be in the range 1-100.\n");
+        Cmd::PrintUsage(stderr, EXIT_FAILURE);
+    }
+    else
+    {
+        this->m_nbTimeOn = l * 10;
+        this->m_nbTimeOff = 1000 - this->GetTimeOn();
+    }
 }
 
 void Config::SetHighPriority(int p)

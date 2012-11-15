@@ -18,8 +18,7 @@ class Config
         ~Config(void);
         void SetExeName(WCHAR * e);
         void SetProcessId(DWORD p);
-        void SetTimeOn(int ton);
-        void SetTimeOff(int toff);
+        void SetLimit(int l);
         void SetHighPriority(int p);
         void SetNtDll(int n);
         void SetCodeExePriority(int p);
