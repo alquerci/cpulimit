@@ -11,6 +11,6 @@ void Cmd::PrintUsage(FILE * stream, int exit_code)
     fprintf(stream, "    TARGET must be exactly one of these:\n");
     fprintf(stream, "       -p, --pid=N     pid of the process (implies -z)\n");
     fprintf(stream, "       -e, --exe=FILE  name of the executable program file or path name\n");
-    fprintf(stream, "\nReport bugs to <alexandre.quercia@orange.fr>.\n");
+    fprintf(stream, "\nReport bugs to <alexandrequercia@orange.fr>.\n");
     ExitProcess(exit_code);
 }
