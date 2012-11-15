@@ -11,9 +11,10 @@ class Config
         int m_isNtDll;
         int m_codeExePriority;
         int m_isLazy;
+        void GetOpt(int argc, WCHAR **argv);
 
     public:
-        Config(void);
+        Config(int argc, WCHAR **argv);
         ~Config(void);
         void SetExeName(WCHAR * e);
         void SetProcessId(DWORD p);

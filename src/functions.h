@@ -7,7 +7,7 @@ void __fastcall SuspendResumeIt(DWORD pid, bool suspend);
 void __fastcall cpulimitMain(int argc, WCHAR *argv[]);
 
 void process_limiter(Config settings, HANDLE prc);
-HANDLE process_finder(Config *settings, int pid_ok);
+HANDLE process_finder(Config *settings);
 
 typedef DWORD (WINAPI *extSetProcessWorkingSetSizex)(HANDLE, int,int);
 typedef HANDLE (WINAPI *extOpenThreadx)(DWORD, BOOL, DWORD);

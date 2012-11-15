@@ -127,102 +127,8 @@ void __fastcall cpulimitMain(int argc, WCHAR *argv[])
     extSuspendProcess = (extSuspendProcessx)GetProcAddress(LoadLibrary(L"ntdll.dll"), "NtSuspendProcess");
 
 
-    Config settings = Config();
+    Config settings = Config(argc, argv);
     MyExceptionHandler::SetSettings(&settings);
-
-    //argument variables
-    int limit_ok = 0;
-    int exe_ok = 0;
-    int pid_ok = 0;
-
-    WCHAR *exe = NULL;
-    int pid = 0;
-    int perclimit = 0;
-
-    //parse arguments
-    int next_option;
-    int option_index = 0;
-    //A string listing valid short options letters
-    const WCHAR* short_options = L"+p:e:l:Izh";
-    //An array describing valid long options
-    const struct option long_options[] = {
-        { L"pid", required_argument, NULL, L'p' },
-        { L"exe", required_argument, NULL, L'e' },
-        { L"limit", required_argument, NULL, L'l' },
-        { L"lazy", no_argument, NULL, L'z' },
-        { L"idle", no_argument, NULL, L'I' },
-        { L"help", no_argument, NULL, L'h' },
-        { 0, 0, 0, 0 }
-    };
-    do
-    {
-        next_option = getopt_long(argc, argv, short_options, long_options, &option_index);
-        switch(next_option) 
-        {
-            case 'p':
-                pid = _wtoi(optarg);
-                pid_ok = 1;
-                break;
-            case 'e':
-                exe = optarg;
-                exe_ok = 1;
-                break;
-            case 'l':
-                perclimit = _wtoi(optarg);
-                limit_ok = 1;
-                break;
-            case 'z':
-                settings.SetLazy(1);
-                break;
-            case 'I':
-                settings.SetCodeExePriority(0);
-                break;
-            case 'h':
-                Cmd::PrintUsage(stdout, EXIT_FAILURE);
-                break;
-            case '?':
-                Cmd::PrintUsage(stderr, EXIT_FAILURE);
-                break;
-            case -1:
-                break;
-            default:
-                abort();
-        }
-    } while(next_option != -1);
-
-    if (limit_ok)
-    {
-        if (perclimit < 1 || perclimit > 100)
-        {
-            fprintf(stderr,"Error: limit must be in the range 1-100\n");
-            Cmd::PrintUsage(stderr, EXIT_FAILURE);
-        }
-        else
-        {
-            settings.SetTimeOn(perclimit * 10);
-            settings.SetTimeOff(1000 - settings.GetTimeOn());
-        }
-    }
-
-    if (exe_ok && pid_ok)
-    {
-        fprintf(stderr,"Error: You must specify exactly one target process, either by name or pid.\n");
-        Cmd::PrintUsage(stderr, EXIT_FAILURE);
-    }
-    else if(exe_ok)
-    {
-        settings.SetExeName(exe);
-    }
-    else if (pid_ok)
-    {
-        settings.SetLazy(1);
-        settings.SetProcessId(pid);
-    }
-    else
-    {
-        fprintf(stderr,"Error: You must specify one target process, either by name or pid\n");
-        Cmd::PrintUsage(stderr, EXIT_FAILURE);
-    }
 
     if(extOpenThread)
     {
@@ -249,7 +155,7 @@ void __fastcall cpulimitMain(int argc, WCHAR *argv[])
             }
             if(!prc)
             {
-                prc = process_finder(&settings, pid_ok);
+                prc = process_finder(&settings);
             }
 
             // Control process
@@ -315,13 +221,13 @@ void process_limiter(Config settings, HANDLE prc)
     }
 }
 
-HANDLE process_finder(Config *settings, int pid_ok)
+HANDLE process_finder(Config *settings)
 {
     HANDLE prc = 0;
     DWORD prc_priority = NORMAL_PRIORITY_CLASS;
     DWORD pid = 0;
 
-    if (pid_ok)
+    if (settings->GetProcessId())
     {
         prc = ProcById(settings->GetProcessId());
     }
