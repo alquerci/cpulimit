@@ -127,13 +127,13 @@ void __fastcall cpulimitMain(int argc, WCHAR *argv[])
     extSuspendProcess = (extSuspendProcessx)GetProcAddress(LoadLibrary(L"ntdll.dll"), "NtSuspendProcess");
 
 
-    Config settings = Config(argc, argv);
-    MyExceptionHandler::SetSettings(&settings);
+    Config *settings = new Config(argc, argv);
+    MyExceptionHandler::SetSettings(settings);
 
     if(extOpenThread)
     {
         GetDebugPriv();
-        if(settings.GetHighPriority())
+        if(settings->GetHighPriority())
         {
             SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
         }
@@ -155,13 +155,13 @@ void __fastcall cpulimitMain(int argc, WCHAR *argv[])
             }
             if(!prc)
             {
-                prc = process_finder(&settings);
+                prc = process_finder(settings);
             }
 
             // Control process
             if(prc)
             {
-                if(settings.GetProcessId() == curProcId)
+                if(settings->GetProcessId() == curProcId)
                 {
                     printf("Target process %d is cpulimit itself! Aborting because it makes no sense\n", curProcId);
                     ExitProcess(EXIT_FAILURE);
@@ -171,7 +171,7 @@ void __fastcall cpulimitMain(int argc, WCHAR *argv[])
             else
             {
                 // Wait process
-                if (settings.GetLazy())
+                if (settings->GetLazy())
                 {
                     break;
                 }
@@ -189,30 +189,30 @@ void __fastcall cpulimitMain(int argc, WCHAR *argv[])
 }
 
 
-void process_limiter(Config settings, HANDLE prc)
+void process_limiter(Config *settings, HANDLE prc)
 {
-    if(settings.GetTimeOff() > 0)
+    if(settings->GetTimeOff() > 0)
     {
-        if(extSuspendProcess && settings.GetNtDll())
+        if(extSuspendProcess && settings->GetNtDll())
         {
             extSuspendProcess(prc);
         }
         else
         {
-            SuspendResumeIt(settings.GetProcessId(), 1);
+            SuspendResumeIt(settings->GetProcessId(), 1);
         }
 
-        Sleep(settings.GetTimeOff());
+        Sleep(settings->GetTimeOff());
 
-        if(extResumeProcess && settings.GetNtDll())
+        if(extResumeProcess && settings->GetNtDll())
         {
             extResumeProcess(prc);
         }
         else
         {
-            SuspendResumeIt(settings.GetProcessId(), 0);
+            SuspendResumeIt(settings->GetProcessId(), 0);
         }
-        Sleep(settings.GetTimeOn());
+        Sleep(settings->GetTimeOn());
     }
     else
     {
