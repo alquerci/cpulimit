@@ -127,7 +127,7 @@ void __fastcall cpulimitMain(int argc, WCHAR *argv[])
     extSuspendProcess = (extSuspendProcessx)GetProcAddress(LoadLibrary(L"ntdll.dll"), "NtSuspendProcess");
 
 
-    ClSettings settings = GetSettings();
+    Config settings = Config();
     MyExceptionHandler::SetSettings(&settings);
 
     //argument variables
@@ -172,10 +172,10 @@ void __fastcall cpulimitMain(int argc, WCHAR *argv[])
                 limit_ok = 1;
                 break;
             case 'z':
-                settings.lazy = 1;
+                settings.SetLazy(1);
                 break;
             case 'I':
-                settings.codeExePriority = 0;
+                settings.SetCodeExePriority(0);
                 break;
             case 'h':
                 Cmd::PrintUsage(stdout, EXIT_FAILURE);
@@ -199,8 +199,8 @@ void __fastcall cpulimitMain(int argc, WCHAR *argv[])
         }
         else
         {
-            settings.nbTimeOn = perclimit * 10;
-            settings.nbTimeOff = 1000 - settings.nbTimeOn;
+            settings.SetTimeOn(perclimit * 10);
+            settings.SetTimeOff(1000 - settings.GetTimeOn());
         }
     }
 
@@ -211,12 +211,12 @@ void __fastcall cpulimitMain(int argc, WCHAR *argv[])
     }
     else if(exe_ok)
     {
-        settings.ExeName = exe;
+        settings.SetExeName(exe);
     }
     else if (pid_ok)
     {
-        settings.lazy = 1;
-        settings.pid = pid;
+        settings.SetLazy(1);
+        settings.SetProcessId(pid);
     }
     else
     {
@@ -227,7 +227,7 @@ void __fastcall cpulimitMain(int argc, WCHAR *argv[])
     if(extOpenThread)
     {
         GetDebugPriv();
-        if(settings.isHighPriority)
+        if(settings.GetHighPriority())
         {
             SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
         }
@@ -255,7 +255,7 @@ void __fastcall cpulimitMain(int argc, WCHAR *argv[])
             // Control process
             if(prc)
             {
-                if(settings.pid == curProcId)
+                if(settings.GetProcessId() == curProcId)
                 {
                     printf("Target process %d is cpulimit itself! Aborting because it makes no sense\n", curProcId);
                     ExitProcess(EXIT_FAILURE);
@@ -265,7 +265,7 @@ void __fastcall cpulimitMain(int argc, WCHAR *argv[])
             else
             {
                 // Wait process
-                if (settings.lazy)
+                if (settings.GetLazy())
                 {
                     break;
                 }
@@ -283,30 +283,30 @@ void __fastcall cpulimitMain(int argc, WCHAR *argv[])
 }
 
 
-void process_limiter(ClSettings settings, HANDLE prc)
+void process_limiter(Config settings, HANDLE prc)
 {
-    if(settings.nbTimeOff > 0)
+    if(settings.GetTimeOff() > 0)
     {
-        if(extSuspendProcess && settings.isNtDll)
+        if(extSuspendProcess && settings.GetNtDll())
         {
             extSuspendProcess(prc);
         }
         else
         {
-            SuspendResumeIt(settings.pid, 1);
+            SuspendResumeIt(settings.GetProcessId(), 1);
         }
 
-        Sleep(settings.nbTimeOff);
+        Sleep(settings.GetTimeOff());
 
-        if(extResumeProcess && settings.isNtDll)
+        if(extResumeProcess && settings.GetNtDll())
         {
             extResumeProcess(prc);
         }
         else
         {
-            SuspendResumeIt(settings.pid, 0);
+            SuspendResumeIt(settings.GetProcessId(), 0);
         }
-        Sleep(settings.nbTimeOn);
+        Sleep(settings.GetTimeOn());
     }
     else
     {
@@ -315,24 +315,26 @@ void process_limiter(ClSettings settings, HANDLE prc)
     }
 }
 
-HANDLE process_finder(ClSettings *settings, int pid_ok)
+HANDLE process_finder(Config *settings, int pid_ok)
 {
     HANDLE prc = 0;
     DWORD prc_priority = NORMAL_PRIORITY_CLASS;
+    DWORD pid = 0;
 
     if (pid_ok)
     {
-        prc = ProcById(settings->pid);
+        prc = ProcById(settings->GetProcessId());
     }
     else
     {
-        prc = ProcByExe(settings->ExeName, settings->pid);
+        prc = ProcByExe(settings->GetExeName(), pid);
+        settings->SetProcessId(pid);
     }
 
     if(prc)
     {
-        fprintf(stdout, "Process %d found.\n", settings->pid);
-        switch (settings->codeExePriority)
+        fprintf(stdout, "Process %d found.\n", settings->GetProcessId());
+        switch (settings->GetCodeExePriority())
         {
         case 0:
             prc_priority = IDLE_PRIORITY_CLASS;

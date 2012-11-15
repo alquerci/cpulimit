@@ -19,7 +19,7 @@
 #include <Tlhelp32.h>
 #include <signal.h>
 
-#include "clsettings.h"
+#include "Config.h"
 #include "targetver.h"
 #include "functions.h"
 #include "RTL_calls.h"

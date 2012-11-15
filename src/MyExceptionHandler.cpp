@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-ClSettings *MyExceptionHandler::settings = NULL;
+Config *MyExceptionHandler::settings = NULL;
 HANDLE *MyExceptionHandler::handleCollection[10] = {NULL};
 int MyExceptionHandler::handleNb = 0;
 
@@ -12,7 +12,7 @@ MyExceptionHandler::~MyExceptionHandler()
 {
 }
 
-void MyExceptionHandler::SetSettings(ClSettings *settings)
+void MyExceptionHandler::SetSettings(Config *settings)
 {
     MyExceptionHandler::settings = settings;
 }
@@ -39,7 +39,7 @@ void MyExceptionHandler::OnExit(int dummy)
 
     if (MyExceptionHandler::settings != NULL)
     {
-        SuspendResumeIt(MyExceptionHandler::settings->pid, 0);
+        SuspendResumeIt(MyExceptionHandler::settings->GetProcessId(), 0);
     }
     ExitProcess(0);
 }

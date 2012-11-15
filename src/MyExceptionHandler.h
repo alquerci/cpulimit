@@ -3,7 +3,7 @@
 class MyExceptionHandler
 {
     private:
-        static ClSettings *settings;
+        static Config *settings;
         static HANDLE *handleCollection[];
         static int handleNb;
 
@@ -12,7 +12,7 @@ class MyExceptionHandler
         ~MyExceptionHandler();
         static void OnExit(int dummy = 0);
         static void AddHandle(HANDLE *handle);
-        static void SetSettings(ClSettings *settings);
+        static void SetSettings(Config *settings);
         static void SignalRegister();
 };
 
