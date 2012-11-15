@@ -282,30 +282,6 @@ void __fastcall cpulimitMain(int argc, WCHAR *argv[])
     amtx = NULL;
 }
 
-void __fastcall HaltMich()
-{
-    HANDLE mtx;
-    if((mtx = OpenMutex(MUTEX_ALL_ACCESS, 0, L"CPULimit_Activated_Mutex")) != NULL)
-    {
-        CloseHandle(mtx);
-        mtx = NULL;
-        CreateMutex(0, 0, L"CPULimit_Deactivate_Mutex");
-        for(;;)
-        {
-            mtx = OpenMutex(MUTEX_ALL_ACCESS, 0, L"CPULimit_Activated_Mutex");
-            if(mtx)
-            {
-                CloseHandle(mtx);
-                mtx = NULL;
-                Sleep(10);
-            }
-            else
-            {
-                break;
-            }
-        }
-    }
-}
 
 void process_limiter(ClSettings settings, HANDLE prc)
 {
