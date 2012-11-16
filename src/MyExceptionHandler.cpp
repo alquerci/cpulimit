@@ -1,8 +1,9 @@
 #include "stdafx.h"
+#include "MyExceptionHandler.h"
 
-Config *MyExceptionHandler::settings = NULL;
-HANDLE *MyExceptionHandler::handleCollection[10] = {NULL};
-int MyExceptionHandler::handleNb = 0;
+ProcessHandler *MyExceptionHandler::ph = NULL;
+Config *MyExceptionHandler::cfg = NULL;
+int MyExceptionHandler::IsExiting = 0;
 
 MyExceptionHandler::MyExceptionHandler()
 {
@@ -12,44 +13,40 @@ MyExceptionHandler::~MyExceptionHandler()
 {
 }
 
-void MyExceptionHandler::SetSettings(Config *settings)
+void MyExceptionHandler::SetProcessHandler(ProcessHandler *ph)
 {
-    MyExceptionHandler::settings = settings;
+    MyExceptionHandler::ph = ph;
 }
 
-void MyExceptionHandler::AddHandle(HANDLE *handle)
+void MyExceptionHandler::SetConfig(Config *cfg)
 {
-    MyExceptionHandler::handleCollection[MyExceptionHandler::handleNb] = handle;
-    MyExceptionHandler::handleNb++;
+    MyExceptionHandler::cfg = cfg;
 }
 
-void MyExceptionHandler::OnExit(int dummy)
+BOOL MyExceptionHandler::CtrlHandler(DWORD dwCtrlType)
 {
-    // Close all open handles
-    int i = 0;
-
-    for(i = 0 ; MyExceptionHandler::handleNb > i ; i++)
+    if (MyExceptionHandler::ph != NULL)
     {
-        if (*MyExceptionHandler::handleCollection[i] != NULL)
+        if (ph->IsOpen() && !ph->IsRunning())
         {
-            CloseHandle(*MyExceptionHandler::handleCollection[i]);
-            *MyExceptionHandler::handleCollection[i] = NULL;
+            MyExceptionHandler::ph->Resume();
         }
     }
 
-    if (MyExceptionHandler::settings != NULL)
+    if(dwCtrlType != CTRL_BREAK_EVENT)
     {
-        SuspendResumeIt(MyExceptionHandler::settings->GetProcessId(), 0);
+        MyExceptionHandler::IsExiting = 1;
     }
-    ExitProcess(0);
+
+    return TRUE;
 }
 
 void MyExceptionHandler::SignalRegister()
 {
-    signal(SIGINT, MyExceptionHandler::OnExit);
-    //signal(SIGILL, MyExceptionHandler::OnExit);
-    //signal(SIGTERM, MyExceptionHandler::OnExit);
-    signal(SIGBREAK, MyExceptionHandler::OnExit);
-    signal(SIGABRT, MyExceptionHandler::OnExit);
-    signal(SIGABRT_COMPAT, MyExceptionHandler::OnExit);
+    SetConsoleCtrlHandler((PHANDLER_ROUTINE)MyExceptionHandler::CtrlHandler, TRUE);
+}
+
+int MyExceptionHandler::GetIsExiting()
+{
+    return IsExiting;
 }

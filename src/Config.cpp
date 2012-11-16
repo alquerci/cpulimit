@@ -1,8 +1,14 @@
 #include "stdafx.h"
+// vendor
+#include "../vendor/ermshiperete/getopt/getoptLib/getopt.h"
+#include "Config.h"
+
+const unsigned int Config::TIME_SLOT = 1000;
 
 Config::Config(int argc, WCHAR **argv)
 {
-    this->m_codeExePriority = 1;
+    this->m_error = 0;
+    this->m_codeExePriority = NORMAL_PRIORITY_CLASS;
     this->m_ExeName = NULL;
     this->m_isHighPriority = 1;
     this->m_isNtDll = 1;
@@ -10,6 +16,9 @@ Config::Config(int argc, WCHAR **argv)
     this->m_nbTimeOff = 0;
     this->m_nbTimeOn = 0;
     this->m_pid = 0;
+    this->m_Close = 0;
+    this->m_Verbose = 0;
+    this->m_CpuUsage = 100;
 
     this->GetOpt(argc, argv);
 }
@@ -18,35 +27,59 @@ Config::~Config(void)
 {
 }
 
+void Config::PrintUsage(FILE * stream)
+{
+    fprintf(stream, "Usage: cpulimit [OPTIONS...] TARGET\n");
+    fprintf(stream, "    OPTIONS\n");
+    fprintf(stream, "       -l, --limit=N   percentage of cpu allowed from 1 to 100\n");
+    fprintf(stream, "       -v, --verbose   show control statistics\n");
+    fprintf(stream, "       -z, --lazy      exit if there is no target process, or if it dies\n");
+    fprintf(stream, "       -I, --idle      To run the process on low priority\n");
+    fprintf(stream, "       -c, --close     Close the specified cpulimit attached to a TARGET (implies -z)\n");
+    fprintf(stream, "       -h, --help      display this help and exit\n");
+    fprintf(stream, "    TARGET must be exactly one of these:\n");
+    fprintf(stream, "       -p, --pid=N     pid of the process (implies -z)\n");
+    fprintf(stream, "       -e, --exe=FILE  name of the executable program file or path name\n");
+    fprintf(stream, "\nReport bugs to <alexandrequercia@orange.fr>.\n");
+}
+
+int Config::GetError()
+{
+    return this->m_error;
+}
+
 void Config::GetOpt(int argc, WCHAR **argv)
 {
     //argument variables
     int exe_ok = 0;
     int pid_ok = 0;
+    int help_ok = 0;
 
     WCHAR *exe = NULL;
     int pid = 0;
 
     //parse arguments
-    int next_option;
+    int next_option = 0;
     int option_index = 0;
     //A string listing valid short options letters
-    const WCHAR* short_options = L"+p:e:l:Izh";
+    const WCHAR* short_options = L"+p:e:l:Izhcv";
     //An array describing valid long options
     const struct option long_options[] = {
-        { L"pid", required_argument, NULL, L'p' },
-        { L"exe", required_argument, NULL, L'e' },
-        { L"limit", required_argument, NULL, L'l' },
-        { L"lazy", no_argument, NULL, L'z' },
-        { L"idle", no_argument, NULL, L'I' },
-        { L"help", no_argument, NULL, L'h' },
-        { 0, 0, 0, 0 }
+        { L"pid",       required_argument,  NULL,   L'p' },
+        { L"exe",       required_argument,  NULL,   L'e' },
+        { L"limit",     required_argument,  NULL,   L'l' },
+        { L"verbose",   no_argument,        NULL,   L'v' },
+        { L"lazy",      no_argument,        NULL,   L'z' },
+        { L"idle",      no_argument,        NULL,   L'I' },
+        { L"close",     no_argument,        NULL,   L'c' },
+        { L"help",      no_argument,        NULL,   L'h' },
+        { 0,            0,                  0,      0 }
     };
 
     do
     {
         next_option = getopt_long(argc, argv, short_options, long_options, &option_index);
-        switch(next_option) 
+        switch(next_option)
         {
             case 'p':
                 pid = _wtoi(optarg);
@@ -59,45 +92,70 @@ void Config::GetOpt(int argc, WCHAR **argv)
             case 'l':
                 this->SetLimit(_wtoi(optarg));
                 break;
+            case 'v':
+                this->SetVerbose(1);
+                break;
             case 'z':
                 this->SetLazy(1);
                 break;
             case 'I':
-                this->SetCodeExePriority(0);
+                this->SetCodeExePriority(IDLE_PRIORITY_CLASS);
+                break;
+            case 'c':
+                this->SetClose(1);
+                this->SetLazy(1);
                 break;
             case 'h':
-                Cmd::PrintUsage(stdout, EXIT_SUCCESS);
+                Config::PrintUsage(stdout);
+                help_ok = 1;
                 break;
             case '?':
-                Cmd::PrintUsage(stderr, EXIT_FAILURE);
+                help_ok = 1;
+                Config::PrintUsage(stderr);
                 break;
             case -1:
                 break;
             default:
-                abort();
+                break;
         }
     } while(next_option != -1);
 
-    if (exe_ok && pid_ok)
+    if(!help_ok)
     {
-        fprintf(stderr, "Error: You must specify exactly one target process, either by name or pid.\n");
-        Cmd::PrintUsage(stderr, EXIT_FAILURE);
-    }
-    else if (exe_ok)
-    {
-        this->SetExeName(exe);
-    }
-    else if (pid_ok)
-    {
-        this->SetLazy(1);
-        this->SetProcessId(pid);
+        if (exe_ok && pid_ok)
+        {
+            fprintf(stderr, "Error: You must specify exactly one target process, either by name or pid.\n");
+            this->m_error += 1;
+            Config::PrintUsage(stderr);
+        }
+        else if (exe_ok)
+        {
+            this->SetExeName(exe);
+        }
+        else if (pid_ok)
+        {
+            this->SetLazy(1);
+            this->SetProcessId(pid);
+        }
+        else
+        {
+            fprintf(stderr, "Error: You must specify one target process, either by name or pid.\n");
+            this->m_error += 1;
+            Config::PrintUsage(stderr);
+        }
+
+
+        if (this->m_Verbose)
+        {
+            printf("\n | %%CPU\t| work quantum\t| sleep quantum\t|\n");
+            printf("   %d%%\t  %6ld ms\t  %6ld ms \n", 
+                this->m_CpuUsage, this->m_nbTimeOn, this->m_nbTimeOff);
+        }
     }
     else
     {
-        fprintf(stderr, "Error: You must specify one target process, either by name or pid.\n");
-        Cmd::PrintUsage(stderr, EXIT_FAILURE);
+        this->m_error += 1;
     }
-
 }
 
 void Config::SetExeName(WCHAR * e)
@@ -115,12 +173,13 @@ void Config::SetLimit(int l)
     if (l < 1 || l > 100)
     {
         fprintf(stderr,"Error: Limit must be in the range 1-100.\n");
-        Cmd::PrintUsage(stderr, EXIT_FAILURE);
+        this->m_error += 1;
     }
     else
     {
-        this->m_nbTimeOn = l * 10;
-        this->m_nbTimeOff = 1000 - this->GetTimeOn();
+        this->m_nbTimeOn = (Config::TIME_SLOT / 100) * l;
+        this->m_nbTimeOff = Config::TIME_SLOT - this->GetTimeOn();
+        this->m_CpuUsage = l;
     }
 }
 
@@ -144,6 +203,15 @@ void Config::SetLazy(int l)
     this->m_isLazy = l;
 }
 
+void Config::SetClose(int close)
+{
+    this->m_Close = close;
+}
+
+void Config::SetVerbose(int v)
+{
+    this->m_Verbose = v;
+}
 
 
 WCHAR * Config::GetExeName()
@@ -184,4 +252,14 @@ int Config::GetCodeExePriority()
 int Config::GetLazy()
 {
     return this->m_isLazy;
+}
+
+int Config::GetClose()
+{
+    return this->m_Close;
+}
+
+int Config::GetVerbose()
+{
+    return this->m_Verbose;
 }
