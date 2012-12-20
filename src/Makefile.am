@@ -1,11 +1,8 @@
 bin_PROGRAMS = cpulimit
 cpulimit_SOURCES = \
-clsettings.cpp \
-comandline.cpp \
+Config.cpp \
 cpulimit.cpp \
-functions.cpp \
 MyExceptionHandler.cpp \
-RTL_calls.cpp \
-stdafx.cpp \
+ProcessHandler.cpp \
 ../vendor/ermshiperete/getopt/getoptLib/getopt.c
 

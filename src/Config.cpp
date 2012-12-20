@@ -263,3 +263,14 @@ int Config::GetVerbose()
 {
     return this->m_Verbose;
 }
+
+
+#ifndef _WSTDLIB_DEFINED
+    int _wtoi(const wchar_t * _Str)
+    {
+        long l = 0;
+        wchar_t *stopwcs;
+        l = wcstol(_Str, &stopwcs, 10);
+        return (int) l;
+    }
+#endif
