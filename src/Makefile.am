@@ -6,5 +6,6 @@ cpulimit.cpp \
 functions.cpp \
 MyExceptionHandler.cpp \
 RTL_calls.cpp \
-stdafx.cpp
+stdafx.cpp \
+../vendor/ermshiperete/getopt/getoptLib/getopt.c
 
