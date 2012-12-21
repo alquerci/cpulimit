@@ -17,7 +17,6 @@
  */
 
 #pragma once
-#define EXPORTS_GETOPT
 
 #ifndef _WSTDLIB_DEFINED
     int _wtoi(const wchar_t * _Str);

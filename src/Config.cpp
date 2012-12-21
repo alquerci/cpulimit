@@ -18,6 +18,7 @@
 
 #include "stdafx.h"
 // vendor
+#define EXPORTS_GETOPT
 #include "../vendor/ermshiperete/getopt/getoptLib/getopt.h"
 #include "Config.h"
 
