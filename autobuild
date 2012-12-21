@@ -1,6 +1,7 @@
 #!/bin/bash
 
-cross_target="i686-pc-mingw32";
+cross_target="i686-pc-cygwin";
+cross_host="i686-pc-mingw32";
 
 echo "SUBDIRS = src" > Makefile.am
 
@@ -12,10 +13,7 @@ cpulimit.cpp \
 MyExceptionHandler.cpp \
 ProcessHandler.cpp \
 ../vendor/ermshiperete/getopt/getoptLib/getopt.c
-
-CPP = "$cross_target"-g++
-CXX = "$cross_target"-g++
-C = "$cross_target"-gcc" > src/Makefile.am
+" > src/Makefile.am
 
 # Build configure.ac
 if [ ! -f configure.ac ];
@@ -49,6 +47,11 @@ then
     touch ChangeLog
 fi
 
+if [ -f "Makefile" ];
+then
+    make distclean
+fi;
+
 aclocal
 autoconf
 
@@ -58,6 +61,7 @@ then
 fi
 
 automake -a -c
-./configure --host="$cross_target" --target="$cross_target"
-make
+./configure --host="$cross_host" --target="$cross_target"
+
+
 exit 0
