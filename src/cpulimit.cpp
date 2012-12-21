@@ -22,7 +22,7 @@
 #include "stdafx.h"
 
 
-int wmain(int argc, WCHAR *argv[])
+int _tmain(int argc, TCHAR *argv[])
 {
     Config *settings = new Config(argc, argv);
     if(settings->GetError())

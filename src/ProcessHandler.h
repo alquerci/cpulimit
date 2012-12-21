@@ -35,14 +35,14 @@ class ProcessHandler
         DWORD m_Id;
         HANDLE m_Handle;
         HANDLE m_ActivateMutex;
-        WCHAR* m_aMutexName;
-        WCHAR* m_dMutexName;
+        TCHAR* m_aMutexName;
+        TCHAR* m_dMutexName;
         Config * m_cfg;
 
         void __fastcall GetDebugPrivilege();
         void __fastcall SuspendResumeIt(DWORD pid, bool suspend);
-        HANDLE FindHandleByName(WCHAR *exe);
-        WCHAR * GenerateMutexName(int mode);
+        HANDLE FindHandleByName(TCHAR *exe);
+        TCHAR * GenerateMutexName(int mode);
 
     public:
         ProcessHandler(Config *c);

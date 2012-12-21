@@ -49,7 +49,7 @@ ProcessHandler::ProcessHandler(Config *c)
             {
                 if(this->m_cfg->GetProcessId())
                 {
-                    fwprintf(stdout, L"Close the cpulimit attached by the process id: %d.\n", this->m_cfg->GetProcessId());
+					fwprintf(stdout, L"Close the cpulimit attached by the process id: %d.\n", this->m_cfg->GetProcessId());
                 }
                 else
                 {
@@ -141,7 +141,7 @@ int ProcessHandler::CheckState()
             fprintf(stdout, "Process %d closed.\n", this->m_Id);
             CloseHandle(this->m_Handle);
             this->m_Handle = NULL;
-            this->m_Id = NULL;
+			this->m_Id = NULL;
             this->m_IsRunning = 0;
             if(this->m_cfg->GetLazy())
             {
@@ -280,7 +280,7 @@ void __fastcall ProcessHandler::SuspendResumeIt(DWORD pid, bool suspend)
     }
 }
 
-HANDLE ProcessHandler::FindHandleByName(WCHAR *exe)
+HANDLE ProcessHandler::FindHandleByName(TCHAR *exe)
 {
     HANDLE prc = 0;
     HANDLE snp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -293,7 +293,7 @@ HANDLE ProcessHandler::FindHandleByName(WCHAR *exe)
         {
             do
             {
-                WCHAR *t = pe.szExeFile + wcslen(pe.szExeFile);
+                TCHAR *t = pe.szExeFile + wcslen(pe.szExeFile);
                 while( (t > pe.szExeFile) && (*t != '\\') && (*t != '/') )
                 {
                     t--;
@@ -332,10 +332,10 @@ int ProcessHandler::IsRunning()
     return this->m_IsRunning;
 }
 
-WCHAR * ProcessHandler::GenerateMutexName(int mode)
+TCHAR * ProcessHandler::GenerateMutexName(int mode)
 {
-    WCHAR wcs[250] = {NULL};
-    WCHAR *out = NULL;
+    TCHAR wcs[250] = {NULL};
+    TCHAR *out = NULL;
     size_t name_size = 0;
     
     if(this->m_Id)
@@ -353,9 +353,13 @@ WCHAR * ProcessHandler::GenerateMutexName(int mode)
 
     name_size = wcslen(wcs)+1;
 
-    out = (WCHAR*) calloc(name_size, sizeof(WCHAR));
+    out = (TCHAR*) calloc(name_size, sizeof(TCHAR));
 
-    wcscpy_s(out, name_size, wcs);
+#if defined WINVER && !defined __CYGWIN__ && !defined __MINGW32__
+	wcscpy_s(out, name_size, wcs);
+#else
+	wcscpy(out, wcs);
+#endif
 
     return out;
 }

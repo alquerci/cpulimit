@@ -36,6 +36,8 @@
 #include <stdio.h>
 #include <Tlhelp32.h>
 #include <signal.h>
+#include <wchar.h>
+#include <tchar.h>
 
 #include "targetver.h"
 #include "Config.h"

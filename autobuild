@@ -1,0 +1,63 @@
+#!/bin/bash
+
+cross_target="i686-pc-mingw32";
+
+echo "SUBDIRS = src" > Makefile.am
+
+echo \
+"bin_PROGRAMS = cpulimit
+cpulimit_SOURCES = \
+Config.cpp \
+cpulimit.cpp \
+MyExceptionHandler.cpp \
+ProcessHandler.cpp \
+../vendor/ermshiperete/getopt/getoptLib/getopt.c
+
+CPP = "$cross_target"-g++
+CXX = "$cross_target"-g++
+C = "$cross_target"-gcc" > src/Makefile.am
+
+# Build configure.ac
+if [ ! -f configure.ac ];
+then
+    autoscan;
+    if test $?;
+    then
+        echo "Missing 'configure.ac' use 'configure.scan' to create it." 1>&2;
+        echo "AM_INIT_AUTOMAKE # Add this line after all INIT" >> configure.scan;
+    fi;
+    exit 1;
+fi;
+
+if [ ! -f NEWS ]
+then
+    touch NEWS
+fi
+
+if [ ! -f README ]
+then
+    touch README
+fi
+
+if [ ! -f AUTHORS ]
+then
+    touch AUTHORS
+fi
+
+if [ ! -f ChangeLog ]
+then
+    touch ChangeLog
+fi
+
+aclocal
+autoconf
+
+if [ $(grep -c "AC_CONFIG_HEADERS" configure.ac) -gt 0 ]
+then
+    autoheader
+fi
+
+automake -a -c
+./configure --host="$cross_target" --target="$cross_target"
+make
+exit 0

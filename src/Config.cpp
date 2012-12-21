@@ -23,7 +23,7 @@
 
 const unsigned int Config::TIME_SLOT = 1000;
 
-Config::Config(int argc, WCHAR **argv)
+Config::Config(int argc, TCHAR **argv)
 {
     this->m_error = 0;
     this->m_codeExePriority = NORMAL_PRIORITY_CLASS;
@@ -71,21 +71,21 @@ int Config::GetError()
     return this->m_error;
 }
 
-void Config::GetOpt(int argc, WCHAR **argv)
+void Config::GetOpt(int argc, TCHAR **argv)
 {
     //argument variables
     int exe_ok = 0;
     int pid_ok = 0;
     int help_ok = 0;
 
-    WCHAR *exe = NULL;
+    TCHAR *exe = NULL;
     int pid = 0;
 
     //parse arguments
     int next_option = 0;
     int option_index = 0;
     //A string listing valid short options letters
-    const WCHAR* short_options = L"+p:e:l:Izhcv";
+    const TCHAR* short_options = L"+p:e:l:Izhcv";
     //An array describing valid long options
     const struct option long_options[] = {
         { L"pid",       required_argument,  NULL,   L'p' },
@@ -181,7 +181,7 @@ void Config::GetOpt(int argc, WCHAR **argv)
     }
 }
 
-void Config::SetExeName(WCHAR * e)
+void Config::SetExeName(TCHAR * e)
 {
     this->m_ExeName = e;
 }
@@ -237,7 +237,7 @@ void Config::SetVerbose(int v)
 }
 
 
-WCHAR * Config::GetExeName()
+TCHAR * Config::GetExeName()
 {
     return this->m_ExeName;
 }

@@ -27,7 +27,7 @@ class Config
 {
     private:
         int m_error;
-        WCHAR *m_ExeName;
+        TCHAR *m_ExeName;
         DWORD m_pid;
         int m_nbTimeOn;
         int m_nbTimeOff;
@@ -39,8 +39,8 @@ class Config
         int m_Verbose;
         int m_CpuUsage;
 
-        void GetOpt(int argc, WCHAR **argv);
-        void SetExeName(WCHAR * e);
+        void GetOpt(int argc, TCHAR **argv);
+        void SetExeName(TCHAR * e);
         void SetProcessId(DWORD p);
         void SetLimit(int l);
         void SetHighPriority(int p);
@@ -54,12 +54,12 @@ class Config
         // TIME_SLOT must be ending by 00 (ex: 100, 200, ..., 1100, ...)
         static const unsigned int TIME_SLOT;
 
-        Config(int argc, WCHAR **argv);
+        Config(int argc, TCHAR **argv);
         ~Config(void);
 
         int GetError(void);
         static void PrintUsage(FILE * stream);
-        WCHAR * GetExeName();
+        TCHAR * GetExeName();
         DWORD GetProcessId();
         int GetTimeOn();
         int GetTimeOff();
