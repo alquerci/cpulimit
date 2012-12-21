@@ -191,7 +191,7 @@ HANDLE ProcessHandler::FindHandle()
 {
     if (this->m_Id)
     {
-        this->m_Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, this->m_Id);
+        this->m_Handle = OpenProcess(PROCESS_SUSPEND_RESUME, 0, this->m_Id);
     }
     else
     {
@@ -288,7 +288,7 @@ HANDLE ProcessHandler::FindHandleByName(WCHAR *exe)
 
                 if( ! wcscmp(t, exe) )
                 {
-                    prc = OpenProcess(PROCESS_ALL_ACCESS, 0, pe.th32ProcessID);
+                    prc = OpenProcess(PROCESS_SUSPEND_RESUME, 0, pe.th32ProcessID);
                     this->m_Id = pe.th32ProcessID;
                     break;
                 }
