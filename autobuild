@@ -3,6 +3,13 @@
 cross_target="i686-pc-cygwin";
 cross_host="i686-pc-mingw32";
 
+if [ ! -f "vendor/ermshiperete/getopt/getoptLib/getopt.c" ];
+then
+    git submodule init;
+    git submodule update;
+fi;
+
+
 echo "SUBDIRS = src" > Makefile.am
 
 echo \
