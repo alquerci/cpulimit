@@ -21,16 +21,17 @@
 class MyExceptionHandler
 {
     private:
-        static ClSettings *settings;
-        static HANDLE *handleCollection[];
-        static int handleNb;
+        static ProcessHandler *ph;
+        static Config *cfg;
+        static int IsExiting;
 
     public:
-        MyExceptionHandler();
-        ~MyExceptionHandler();
-        static void OnExit(int dummy = 0);
-        static void AddHandle(HANDLE *handle);
-        static void SetSettings(ClSettings *settings);
-        static void SignalRegister();
+        MyExceptionHandler(void);
+        ~MyExceptionHandler(void);
+        static BOOL CtrlHandler(DWORD dwCtrlType);
+        static void SetProcessHandler(ProcessHandler *ph);
+        static void SetConfig(Config *cfg);
+        static void SignalRegister(void);
+        static int GetIsExiting(void);
 };
 

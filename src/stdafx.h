@@ -37,17 +37,10 @@
 #include <Tlhelp32.h>
 #include <signal.h>
 
-#include "clsettings.h"
 #include "targetver.h"
-#include "functions.h"
-#include "RTL_calls.h"
-#include "cpulimit.h"
-#include "comandline.h"
+#include "Config.h"
+#include "ProcessHandler.h"
 #include "MyExceptionHandler.h"
-
-
-// vendor
-#include "../vendor/ermshiperete/getopt/getoptLib/getopt.h"
-
+#include "cpulimit.h"
 
 #endif // !defined(AFX_STDAFX_H__A9DB83DB_A9FD_11D0_BFD1_444553540000__INCLUDED_)
