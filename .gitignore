@@ -4,3 +4,7 @@ cpulimit.vcproj.*
 *.ncb
 *.suo
 *.sln
+*.o
+*.cache
+*.in
+*.m4
