@@ -18,15 +18,11 @@
 
 #pragma once
 
-#ifndef _WSTDLIB_DEFINED
-    int _wtoi(const wchar_t * _Str);
-#endif
-
 class Config
 {
     private:
         int m_error;
-        TCHAR *m_ExeName;
+        char *m_ExeName;
         DWORD m_pid;
         int m_nbTimeOn;
         int m_nbTimeOff;
@@ -38,8 +34,8 @@ class Config
         int m_Verbose;
         int m_CpuUsage;
 
-        void GetOpt(int argc, TCHAR **argv);
-        void SetExeName(TCHAR * e);
+        void GetOpt(int argc, char **argv);
+        void SetExeName(char * e);
         void SetProcessId(DWORD p);
         void SetLimit(int l);
         void SetHighPriority(int p);
@@ -53,12 +49,12 @@ class Config
         // TIME_SLOT must be ending by 00 (ex: 100, 200, ..., 1100, ...)
         static const unsigned int TIME_SLOT;
 
-        Config(int argc, TCHAR **argv);
+        Config(int argc, char **argv);
         ~Config(void);
 
         int GetError(void);
         static void PrintUsage(FILE * stream);
-        TCHAR * GetExeName();
+        char * GetExeName();
         DWORD GetProcessId();
         int GetTimeOn();
         int GetTimeOff();

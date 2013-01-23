@@ -21,8 +21,7 @@
 
 #include "stdafx.h"
 
-
-int _tmain(int argc, TCHAR *argv[])
+int main(int argc, char **argv)
 {
     Config *settings = new Config(argc, argv);
     if(settings->GetError())

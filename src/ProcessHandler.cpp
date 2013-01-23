@@ -29,10 +29,10 @@ ProcessHandler::ProcessHandler(Config *c)
     this->m_Id = c->GetProcessId();
     this->m_Handle = NULL;
 
-    this->m_extSetProcessWorkingSetSize = (extSetProcessWorkingSetSizex)GetProcAddress(LoadLibrary(L"kernel32.dll"), "SetProcessWorkingSetSize");
-    this->m_extOpenThread = (extOpenThreadx)GetProcAddress(LoadLibrary(L"kernel32.dll"), "OpenThread");
-    this->m_extResumeProcess = (extResumeProcessx)GetProcAddress(LoadLibrary(L"ntdll.dll"), "NtResumeProcess");
-    this->m_extSuspendProcess = (extSuspendProcessx)GetProcAddress(LoadLibrary(L"ntdll.dll"), "NtSuspendProcess");
+    this->m_extSetProcessWorkingSetSize = (extSetProcessWorkingSetSizex)GetProcAddress(LoadLibrary("kernel32.dll"), "SetProcessWorkingSetSize");
+    this->m_extOpenThread = (extOpenThreadx)GetProcAddress(LoadLibrary("kernel32.dll"), "OpenThread");
+    this->m_extResumeProcess = (extResumeProcessx)GetProcAddress(LoadLibrary("ntdll.dll"), "NtResumeProcess");
+    this->m_extSuspendProcess = (extSuspendProcessx)GetProcAddress(LoadLibrary("ntdll.dll"), "NtSuspendProcess");
 
     this->FindHandle();
 
@@ -49,24 +49,24 @@ ProcessHandler::ProcessHandler(Config *c)
             {
                 if(this->m_cfg->GetProcessId())
                 {
-					fwprintf(stdout, L"Close the cpulimit attached by the process id: %d.\n", this->m_cfg->GetProcessId());
+					fprintf(stdout, "Close the cpulimit attached by the process id: %d.\n", this->m_cfg->GetProcessId());
                 }
                 else
                 {
-                    fwprintf(stdout, L"Close the cpulimit attached by the process name: %s.\n", this->m_cfg->GetExeName());
+                    fprintf(stdout, "Close the cpulimit attached by the process name: %s.\n", this->m_cfg->GetExeName());
                 }
                 Sleep(Config::TIME_SLOT*2);
             }
         }
         else
         {
-            fwprintf(stderr, L"cpulimit already started!\n");
+            fprintf(stderr, "cpulimit already started!\n");
         }
         this->m_error += 1;
     }
     else if (this->m_cfg->GetClose())
     {
-        fwprintf(stderr, L"No process exists with MUTEX: %s. Exiting...\n", this->m_aMutexName);
+        fprintf(stderr, "No process exists with MUTEX: %s. Exiting...\n", this->m_aMutexName);
         this->m_error += 1;
     }
     else
@@ -76,7 +76,7 @@ ProcessHandler::ProcessHandler(Config *c)
 
     if (!this->m_extOpenThread)
     {
-        fwprintf(stderr,L"Your system is not supported. Exiting.\n");
+        fprintf(stderr, "Your system is not supported. Exiting.\n");
         this->m_error += 1;
     }
 
@@ -280,7 +280,7 @@ void __fastcall ProcessHandler::SuspendResumeIt(DWORD pid, bool suspend)
     }
 }
 
-HANDLE ProcessHandler::FindHandleByName(TCHAR *exe)
+HANDLE ProcessHandler::FindHandleByName(char *exe)
 {
     HANDLE prc = 0;
     HANDLE snp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -293,7 +293,7 @@ HANDLE ProcessHandler::FindHandleByName(TCHAR *exe)
         {
             do
             {
-                TCHAR *t = pe.szExeFile + wcslen(pe.szExeFile);
+				char *t = pe.szExeFile + strlen(pe.szExeFile);
                 while( (t > pe.szExeFile) && (*t != '\\') && (*t != '/') )
                 {
                     t--;
@@ -304,7 +304,7 @@ HANDLE ProcessHandler::FindHandleByName(TCHAR *exe)
                     t++;
                 }
 
-                if( ! wcscmp(t, exe) )
+				if( ! strcmp(t, exe) )
                 {
                     prc = OpenProcess(PROCESS_SUSPEND_RESUME|SYNCHRONIZE, 0, pe.th32ProcessID);
                     this->m_Id = pe.th32ProcessID;
@@ -332,34 +332,30 @@ int ProcessHandler::IsRunning()
     return this->m_IsRunning;
 }
 
-TCHAR * ProcessHandler::GenerateMutexName(int mode)
+char * ProcessHandler::GenerateMutexName(int mode)
 {
-    TCHAR wcs[250] = {NULL};
-    TCHAR *out = NULL;
+    char mutex_name[250] = {NULL};
+    char *out = NULL;
     size_t name_size = 0;
     
     if(this->m_Id)
     {
-        wsprintf(wcs, L"cpulimit_MODE-%d_PROCESSID-%d", mode, this->m_Id);
+        sprintf(mutex_name, "cpulimit_MODE-%d_PROCESSID-%d", mode, this->m_Id);
     }
     else if (this->m_cfg->GetExeName())
     {
-        wsprintf(wcs, L"cpulimit_MODE-%d_PROCESSNAME-%s", mode, this->m_cfg->GetExeName());
+        sprintf(mutex_name, "cpulimit_MODE-%d_PROCESSNAME-%s", mode, this->m_cfg->GetExeName());
     }
     else
     {
-        wsprintf(wcs, L"cpulimit_MODE-%d", mode);
+        sprintf(mutex_name, "cpulimit_MODE-%d", mode);
     }
 
-    name_size = wcslen(wcs)+1;
+	name_size = strlen(mutex_name)+1;
+	
+    out = (char*) calloc(name_size, sizeof(char));
 
-    out = (TCHAR*) calloc(name_size, sizeof(TCHAR));
-
-#if defined WINVER && !defined __CYGWIN__ && !defined __MINGW32__
-	wcscpy_s(out, name_size, wcs);
-#else
-	wcscpy(out, wcs);
-#endif
+	strcpy(out, mutex_name);
 
     return out;
 }

@@ -24,7 +24,7 @@
 
 const unsigned int Config::TIME_SLOT = 1000;
 
-Config::Config(int argc, TCHAR **argv)
+Config::Config(int argc, char **argv)
 {
     this->m_error = 0;
     this->m_codeExePriority = NORMAL_PRIORITY_CLASS;
@@ -72,31 +72,31 @@ int Config::GetError()
     return this->m_error;
 }
 
-void Config::GetOpt(int argc, TCHAR **argv)
+void Config::GetOpt(int argc, char **argv)
 {
     //argument variables
     int exe_ok = 0;
     int pid_ok = 0;
     int help_ok = 0;
 
-    TCHAR *exe = NULL;
+    char *exe = NULL;
     int pid = 0;
 
     //parse arguments
     int next_option = 0;
     int option_index = 0;
     //A string listing valid short options letters
-    const TCHAR* short_options = L"+p:e:l:Izhcv";
+    const char *short_options = "+p:e:l:Izhcv";
     //An array describing valid long options
     const struct option long_options[] = {
-        { L"pid",       required_argument,  NULL,   L'p' },
-        { L"exe",       required_argument,  NULL,   L'e' },
-        { L"limit",     required_argument,  NULL,   L'l' },
-        { L"verbose",   no_argument,        NULL,   L'v' },
-        { L"lazy",      no_argument,        NULL,   L'z' },
-        { L"idle",      no_argument,        NULL,   L'I' },
-        { L"close",     no_argument,        NULL,   L'c' },
-        { L"help",      no_argument,        NULL,   L'h' },
+		{ "pid",       required_argument,  NULL,   'p' },
+        { "exe",       required_argument,  NULL,   'e' },
+        { "limit",     required_argument,  NULL,   'l' },
+        { "verbose",   no_argument,        NULL,   'v' },
+        { "lazy",      no_argument,        NULL,   'z' },
+        { "idle",      no_argument,        NULL,   'I' },
+        { "close",     no_argument,        NULL,   'c' },
+        { "help",      no_argument,        NULL,   'h' },
         { 0,            0,                  0,      0 }
     };
 
@@ -106,7 +106,7 @@ void Config::GetOpt(int argc, TCHAR **argv)
         switch(next_option)
         {
             case 'p':
-                pid = _wtoi(optarg);
+				pid = atoi(optarg);
                 pid_ok = 1;
                 break;
             case 'e':
@@ -114,7 +114,7 @@ void Config::GetOpt(int argc, TCHAR **argv)
                 exe_ok = 1;
                 break;
             case 'l':
-                this->SetLimit(_wtoi(optarg));
+                this->SetLimit(atoi(optarg));
                 break;
             case 'v':
                 this->SetVerbose(1);
@@ -182,7 +182,7 @@ void Config::GetOpt(int argc, TCHAR **argv)
     }
 }
 
-void Config::SetExeName(TCHAR * e)
+void Config::SetExeName(char * e)
 {
     this->m_ExeName = e;
 }
@@ -238,7 +238,7 @@ void Config::SetVerbose(int v)
 }
 
 
-TCHAR * Config::GetExeName()
+char * Config::GetExeName()
 {
     return this->m_ExeName;
 }
@@ -287,14 +287,3 @@ int Config::GetVerbose()
 {
     return this->m_Verbose;
 }
-
-
-#ifndef _WSTDLIB_DEFINED
-    int _wtoi(const wchar_t * _Str)
-    {
-        long l = 0;
-        wchar_t *stopwcs;
-        l = wcstol(_Str, &stopwcs, 10);
-        return (int) l;
-    }
-#endif
