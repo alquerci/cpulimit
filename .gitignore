@@ -8,3 +8,5 @@ cpulimit.vcproj.*
 *.cache
 *.in
 *.m4
+*.ac
+*.am
