@@ -1,74 +1,9 @@
 #!/bin/bash
 
-cross_target="i686-pc-cygwin";
-cross_host="i686-pc-mingw32";
+mkdir -p build;
+cd build;
 
-if [ ! -f "vendor/ermshiperete/getopt/getoptLib/getopt.c" ];
-then
-    git submodule init;
-    git submodule update;
-fi;
-
-
-echo "SUBDIRS = src" > Makefile.am
-
-echo \
-"bin_PROGRAMS = cpulimit
-cpulimit_SOURCES = \
-Config.cpp \
-cpulimit.cpp \
-MyExceptionHandler.cpp \
-ProcessHandler.cpp \
-../vendor/ermshiperete/getopt/getoptLib/getopt.c
-" > src/Makefile.am
-
-# Build configure.ac
-if [ ! -f configure.ac ];
-then
-    autoscan;
-    if test $?;
-    then
-        echo "Missing 'configure.ac' use 'configure.scan' to create it." 1>&2;
-        echo "AM_INIT_AUTOMAKE # Add this line after all INIT" >> configure.scan;
-    fi;
-    exit 1;
-fi;
-
-if [ ! -f NEWS ]
-then
-    touch NEWS
-fi
-
-if [ ! -f README ]
-then
-    touch README
-fi
-
-if [ ! -f AUTHORS ]
-then
-    touch AUTHORS
-fi
-
-if [ ! -f ChangeLog ]
-then
-    touch ChangeLog
-fi
-
-if [ -f "Makefile" ];
-then
-    make distclean
-fi;
-
-aclocal
-autoconf
-
-if [ $(grep -c "AC_CONFIG_HEADERS" configure.ac) -gt 0 ]
-then
-    autoheader
-fi
-
-automake -a -c
-./configure --host="$cross_host" --target="$cross_target"
-
+cmake ../
+make
 
 exit 0

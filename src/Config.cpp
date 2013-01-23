@@ -18,8 +18,12 @@
 
 #include "stdafx.h"
 // vendor
+#ifdef __CYGWIN__
+#include <getopt.h>
+#else
 #define EXPORTS_GETOPT
 #include "../vendor/ermshiperete/getopt/getoptLib/getopt.h"
+#endif
 #include "Config.h"
 
 const unsigned int Config::TIME_SLOT = 1000;
