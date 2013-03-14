@@ -6,3 +6,4 @@ cpulimit.vcproj.*
 *.suo
 *.sln
 *.o
+/dist
