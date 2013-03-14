@@ -15,18 +15,28 @@ It's a clone of [***cpulimit for linux***][2].
 Build
 -----
 
-$ `git submodule init`
+* WINDOWS
 
-$ `git submodule update`
+    $ `git submodule init`
 
-It's configure to build with "Microsoft Visual C++ 2008"
+    $ `git submodule update`
 
+    It's configure to build with "Microsoft Visual C++ 2008"
+
+
+* CYGWIN
+    * Requirements
+        * `cmake`
+    * Just type $ `make`
+    * You can also create a package with `make package`
 
 Installation
 ------------
 
 You can use it into cygwin.
 
+* CYGWIN
+    * $ `make install`
 
 Help
 ----
@@ -38,8 +48,9 @@ TODO
 ----
 
 * Tests suite
-* Building and install with make
 * Man
+* bash conpletion
+* Fix `make package` (the src tarball is outdate when there are no commit changes)
 
 
 Acknowledgments

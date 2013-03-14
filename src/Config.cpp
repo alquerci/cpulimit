@@ -52,6 +52,7 @@ Config::~Config(void)
 
 void Config::PrintUsage(FILE * stream)
 {
+    fprintf(stream, "cpulimit, version 2.1.0-BETA2\n"); // make a globale VERSION
     fprintf(stream, "cpulimit Copyright (C) 2012 Alexandre Quercia\n");
     fprintf(stream, "This program comes with ABSOLUTELY NO WARRANTY. This is free software,\n");
     fprintf(stream, "and you are welcome to redistribute it under certain conditions.\n");
