@@ -1,9 +1,10 @@
 /Debug
 /Release
-/build
+build
 cpulimit.vcproj.*
 *.ncb
 *.suo
 *.sln
 *.o
 /dist
+/src/CMakeLists.txt
