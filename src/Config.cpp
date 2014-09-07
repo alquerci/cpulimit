@@ -18,7 +18,7 @@
 
 #include "stdafx.h"
 // vendor
-#ifdef __CYGWIN__
+#if HAVE_GETOPT_H
 #include <getopt.h>
 #else
 #define EXPORTS_GETOPT

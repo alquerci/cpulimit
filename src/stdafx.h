@@ -37,6 +37,10 @@
 #include <Tlhelp32.h>
 #include <signal.h>
 
+#if HAVE_CONFIG_H
+    #include "../config.h"
+#endif
+
 #ifndef VERSION
     #define VERSION "2.1.0-DEV"
 #endif
