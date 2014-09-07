@@ -12,31 +12,35 @@ have problems with CPU overheating.
 It's a clone of [***cpulimit for linux***][2].
 
 
-Build
------
+Build and Installation
+-----------------------
 
-* WINDOWS
+This package is compatible with the GNU autotools.
+
+* Windows
 
     $ `git submodule init`
 
     $ `git submodule update`
 
-    It's configure to build with "Microsoft Visual C++ 2008"
+    It's configure to build with "Microsoft Visual C++ 2008":
+
+      - executing `cpulimit.vcproj` file.
 
 
-* CYGWIN
+* Cygwin
+
     * Requirements
-        * `cmake`
-    * Just type $ `make`
-    * You can also create a package with `make package`
 
-Installation
-------------
+        * `autotools`
+        * `make`
 
-You can use it into cygwin.
+    * Briefly the following commands should build, test and install this package.
 
-* CYGWIN
-    * $ `make install`
+        $ `autoreconf -i && ./configure && make && make install`
+
+      See the [`INSTALL`](INSTALL.md) file for more detailed instructions.
+
 
 Help
 ----
@@ -50,7 +54,6 @@ TODO
 * Tests suite
 * Man
 * bash conpletion
-* Fix `make package` (the src tarball is outdate when there are no commit changes)
 
 
 Acknowledgments
