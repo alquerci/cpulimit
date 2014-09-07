@@ -37,6 +37,10 @@
 #include <Tlhelp32.h>
 #include <signal.h>
 
+#ifndef VERSION
+    #define VERSION "2.1.0-DEV"
+#endif
+
 #include "targetver.h"
 #include "Config.h"
 #include "ProcessHandler.h"
