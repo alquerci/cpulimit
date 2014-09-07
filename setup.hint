@@ -1,7 +1,0 @@
-category: Admin Utils
-requires:
-sdesc: "A CPU usage limiter for windows"
-ldesc: "A Cygwin package manager.
-This program allow limit CPU usage by any other program. This can be usefull
-for example for those users, who use distributed calculations clients and have
-problems with CPU overheating."
