@@ -35,7 +35,6 @@ AC_PREPROC_IFELSE(
 
 
 # checks for types
-AC_CHECK_TYPE([void], , AC_MSG_ERROR([type missing]))
 AC_CHECK_TYPE([int], , AC_MSG_ERROR([type missing]))
 AC_CHECK_TYPE([unsigned int], , AC_MSG_ERROR([type missing]))
 AC_CHECK_TYPE([char *], , AC_MSG_ERROR([type missing]))
@@ -60,19 +59,12 @@ AC_CHECK_TYPE([SIZE_T], , AC_MSG_ERROR([type missing]), [
 ])
 AC_CHECK_TYPE([THREADENTRY32], , AC_MSG_ERROR([type missing]), [
     #include <windows.h>
-    #include <TlHelp32.h>
+    #include <tlhelp32.h>
 ])
 AC_CHECK_TYPE([PROCESSENTRY32], , AC_MSG_ERROR([type missing]), [
     #include <windows.h>
-    #include <TlHelp32.h>
+    #include <tlhelp32.h>
 ])
-
-AC_MSG_CHECKING([for WINAPI])
-AC_PREPROC_IFELSE(
-    [AC_LANG_PROGRAM([typedef void (WINAPI *foo)(void);])],
-    [AC_MSG_RESULT([yes])],
-    [AC_MSG_FAILURE([constant missing])]
-)
 
 
 # checks for structures
@@ -88,6 +80,26 @@ AC_CHECK_MEMBER([struct option.flag], , AC_MSG_ERROR([struct missing]), [
 AC_CHECK_MEMBER([struct option.val], , AC_MSG_ERROR([struct missing]), [
     #include <getopt.h>
 ])
+AC_MSG_CHECKING([for WINAPI])
+AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM([
+        #include <windows.h>
+        typedef void (WINAPI *foo)(void);
+    ])],
+    [AC_MSG_RESULT([yes])],
+    [AC_MSG_RESULT([no])]
+    [AC_MSG_FAILURE([constant missing])]
+)
+AC_MSG_CHECKING([for PROCESS_SUSPEND_RESUME])
+AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM([
+        #include <windows.h>
+        int foo = PROCESS_SUSPEND_RESUME;
+    ])],
+    [AC_MSG_RESULT([yes])],
+    [AC_MSG_RESULT([no])]
+    [AC_DEFINE([PROCESS_SUSPEND_RESUME], [0x0800], [Required to suspend or resume a process])]
+)
 
 # checks for compiler characteristics
 AS_CASE(
