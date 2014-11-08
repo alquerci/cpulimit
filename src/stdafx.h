@@ -34,7 +34,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <Tlhelp32.h>
+#include <tlhelp32.h>
 #include <signal.h>
 
 #if HAVE_CONFIG_H
