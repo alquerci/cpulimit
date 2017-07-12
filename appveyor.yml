@@ -1,0 +1,49 @@
+# Do not build feature branch with open Pull Requests
+skip_branch_with_pr: true
+
+# Fetch repository as zip archive
+shallow_clone: true
+
+# Disable unused features
+nuget:
+    disable_publish_on_pr: true
+build: off
+test: off
+deploy: off
+
+# Configure jobs
+matrix:
+    # set this flag to immediately finish build once one of the jobs fails.
+    fast_finish: true
+
+environment:
+    global:
+        CYG_ENV: '%CYG_ROOT%\bin\bash -lc "cd \"$OLDPWD\"; '
+
+    matrix:
+        -
+            CYG_ARCH: x86_64
+            CYG_ROOT: 'C:\cygwin64'
+        -
+            CYG_ARCH: x86
+            CYG_ROOT: 'C:\cygwin'
+
+init:
+    - 'echo OS architecture: %PROCESSOR_ARCHITECTURE%'
+    - 'echo Cygwin architecture: %CYG_ARCH%'
+    - 'set CYG_ROOT=%CYG_ROOT%'
+    - 'echo Cygwin root directory: %CYG_ROOT%'
+    - 'set CYG_ENV=%CYG_ENV%'
+    - 'echo Cygwin executable environment: %CYG_ENV%'
+
+before_build:
+    - '%CYG_ENV% autoreconf -i "'
+    - '%CYG_ENV% ./configure "'
+
+build_script:
+    - '%CYG_ENV% make "'
+
+test_script:
+    - '%CYG_ENV% make install "'
+    - '%CYG_ENV% cpulimit --help "'
+    - '%CYG_ENV% cpulimit && exit 1 || :"'
